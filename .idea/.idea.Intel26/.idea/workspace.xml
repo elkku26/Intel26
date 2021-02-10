@@ -5,26 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7047af75-502a-400b-a178-fe1d61a0f709" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/contentModel.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/projectSettingsUpdater.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/riderModule.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/8080-Programmers-Manual.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/CPU.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/CPU.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/bin/Debug/CPU.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/bin/Debug/CPU.pdb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/.NETFramework,Version=v4.8.AssemblyAttributes.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/CPU.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/CPU.csproj.FileListAbsolute.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/CPU.csprojAssemblyReference.cache" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/CPU.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CPU/obj/Debug/CPU.pdb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Intel26.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Intel26/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,9 +15,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/CPU/CPU.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
       <option value="$PROJECT_DIR$/CPU/Program.cs" />
+      <option value="$PROJECT_DIR$/CPU/CPU.cs" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1oIFB4notCCna525MC5zy7I7mEl" />
@@ -51,7 +36,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.CommitDialog" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RunManager">
     <configuration name="CPU" type="DotNetProject" factoryName=".NET Project">
@@ -82,6 +67,7 @@
       <option name="presentableId" value="Default" />
       <updated>1612966058912</updated>
       <workItem from="1612966061641" duration="656000" />
+      <workItem from="1612966729741" duration="382000" />
     </task>
     <servers />
   </component>
@@ -95,6 +81,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />

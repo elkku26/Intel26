@@ -5,6 +5,7 @@
     <e p="$USER_HOME$/.cache/JetBrains/Rider2020.3/resharper-host/local/Transient/Rider/v203/SolutionCaches/_Intel26.-1174204592.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="CPU" t="IncludeRecursive">
+        <e p=".gitignore" t="Include" />
         <e p="CPU.cs" t="Include" />
         <e p="CPU.csproj" t="IncludeRecursive" />
         <e p="Properties" t="Include">
