@@ -7,7 +7,7 @@ namespace CPU
     /// <summary>
     /// Prepares the CPU for initialization by reading config files and such
     /// </summary>
-    static class PrepSystem
+    internal static class PrepSystem
     {
         /// <summary>
         /// Entry point
@@ -25,9 +25,9 @@ namespace CPU
     /// The actual CPU class itself, in charge of running the binary
     /// </summary>
     class Cpu
-    {
-        private string RunDirectory;
-        private string BinName;
+    { 
+        private readonly string _runDirectory;
+        private readonly string _binName;
 
         /// <summary>
         /// Constructor for CPU Class
@@ -36,8 +36,8 @@ namespace CPU
         /// <param name="binName">The name of the binary that is to be run.</param>
         public Cpu(string runDirectory, string binName)
         {
-            this.RunDirectory = runDirectory;
-            this.BinName = binName;
+            this._runDirectory = runDirectory;
+            this._binName = binName;
         }
         
         /// <summary>
@@ -45,7 +45,7 @@ namespace CPU
         /// </summary>
         /// <param name="path">The path from which the program data is to be loaded.</param>
         /// <returns>A byte array containing the desired data.</returns>
-        public byte[] LoadData(string path)
+        private byte[] LoadData(string path)
         {
             Console.WriteLine("Loading data");
             return File.ReadAllBytes(path);
@@ -56,7 +56,7 @@ namespace CPU
         /// </summary>
         public void InitSystem()
         {
-            byte[] memory = LoadData(RunDirectory + BinName);
+            byte[] memory = LoadData(_runDirectory + _binName);
         }
 
 
