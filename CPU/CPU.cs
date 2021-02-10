@@ -1,17 +1,44 @@
 ﻿using System;
+using System.IO;
 
-namespace CPU
+namespace Intel8080
 {
-    class Cpu
+
+    /// <summary>
+    /// Prepares system for initialization by reading config files and such
+    /// </summary>
+    static class PrepSystem
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello");
+            Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program", "Space Invaders.ch8");
+            cpu.InitSystem();
         }
 
-        public void LoadData()
+    }
+    class Cpu
+    {
+        private string RunDirectory;
+        private string BinName;
+
+        public Cpu(string runDirectory, string binName)
         {
-            Console.WriteLine("Loading data");
+            this.RunDirectory = runDirectory;
+            this.BinName = binName;
         }
+        public byte[] LoadData(string path)
+        {
+            
+            
+            Console.WriteLine("Loading data");
+            return File.ReadAllBytes(RunDirectory);
+        }
+        public void InitSystem()
+        {
+            byte[] memory = LoadData(RunDirectory + BinName);
+        }
+
+
+
     }
 }
