@@ -31,7 +31,7 @@ namespace CPU
         public static void Main(string[] args)
         {
             DebugPrinter.DebugPrint(opcode: B);
-            Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program/", "Space Invaders.ch8");
+            Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program/", "TST8080.COM");
             cpu.InitSystem();
         }
 
@@ -88,8 +88,6 @@ namespace CPU
         {
             PC = 0;
         }
-
-
 
     }
 }
