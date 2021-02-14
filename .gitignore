@@ -5,8 +5,7 @@
 
 .idea
 
-.cpu/bin
-.cpu/obj
+CPU/
 
 # User-specific stuff
 .idea/**/indexLayout.xml

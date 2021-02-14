@@ -1,6 +1,0 @@
-/home/eliasm/Documents/Projects/Intel26/CPU/bin/Debug/CPU.exe
-/home/eliasm/Documents/Projects/Intel26/CPU/bin/Debug/CPU.pdb
-/home/eliasm/Documents/Projects/Intel26/CPU/obj/Debug/CPU.csprojAssemblyReference.cache
-/home/eliasm/Documents/Projects/Intel26/CPU/obj/Debug/CPU.csproj.CoreCompileInputs.cache
-/home/eliasm/Documents/Projects/Intel26/CPU/obj/Debug/CPU.exe
-/home/eliasm/Documents/Projects/Intel26/CPU/obj/Debug/CPU.pdb
