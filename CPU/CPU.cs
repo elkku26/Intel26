@@ -44,10 +44,10 @@ namespace CPU
     { 
         private readonly string _runDirectory;
         private readonly string _binName;
-        public byte[] memory;
-        public byte[] registers;
-        public int pc;
-        private int opCode;
+        public byte[] Memory;
+        public byte[] Registers;
+        public int PC;
+        private int OpCode;
         /// <summary>
         /// Constructor for the CPU Class
         /// </summary>
@@ -67,11 +67,11 @@ namespace CPU
         private byte[] LoadData(string path)
         {
             Debug.WriteLine("Loading data");
-            memory = new byte[64000];
+            Memory = new byte[64000];
             var programData = File.ReadAllBytes(path);
-            Array.Copy( programData, 0, memory, 0, programData.Length);
+            Array.Copy( programData, 0, Memory, 0, programData.Length);
             
-            return memory;
+            return Memory;
         }
         
         /// <summary>
@@ -79,14 +79,14 @@ namespace CPU
         /// </summary>
         public void InitSystem()
         {
-            memory = LoadData(_runDirectory + _binName);
+            Memory = LoadData(_runDirectory + _binName);
 
-            registers = new byte[7];
+            Registers = new byte[7];
         }
 
         public void Step()
         {
-            pc = 0;
+            PC = 0;
         }
 
 
