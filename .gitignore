@@ -5,6 +5,9 @@
 
 .idea
 
+.cpu/bin
+.cpu/obj
+
 # User-specific stuff
 .idea/**/indexLayout.xml
 .idea/**/workspace.xml

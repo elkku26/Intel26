@@ -1,9 +1,23 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using static CPU.Registers;
 
 namespace CPU
 {
+    readonly struct Registers
+    {
+        public const int B = 0;
+        public const int C = 1;
+        public const int D = 2;
+        public const int E = 3;
+        public const int H = 4;
+        public const int L = 5;
+        public const int A = 7;
+
+
+    }
 
     /// <summary>
     /// Prepares the CPU for initialization by reading config files etc.
@@ -16,6 +30,7 @@ namespace CPU
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
+            DebugPrinter.DebugPrint(opcode: B);
             Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program/", "Space Invaders.ch8");
             cpu.InitSystem();
         }
@@ -29,8 +44,9 @@ namespace CPU
     { 
         private readonly string _runDirectory;
         private readonly string _binName;
-        private byte[] memory;
-        private byte[] programData;
+        public byte[] memory;
+        public byte[] registers;
+        public int pc;
         private int opCode;
         /// <summary>
         /// Constructor for the CPU Class
@@ -50,14 +66,11 @@ namespace CPU
         /// <returns>A byte array containing the desired data.</returns>
         private byte[] LoadData(string path)
         {
-            Console.WriteLine("Loading data");
+            Debug.WriteLine("Loading data");
             memory = new byte[64000];
-            programData = File.ReadAllBytes(path);
-            for(int i = 0; i < programData.Length; i++)
-            {
-                Console.WriteLine(i);
-                memory[i] = programData[i];
-            }
+            var programData = File.ReadAllBytes(path);
+            Array.Copy( programData, 0, memory, 0, programData.Length);
+            
             return memory;
         }
         
@@ -66,15 +79,14 @@ namespace CPU
         /// </summary>
         public void InitSystem()
         {
-            byte[] memory = LoadData(_runDirectory + _binName);
+            memory = LoadData(_runDirectory + _binName);
+
+            registers = new byte[7];
         }
 
         public void Step()
         {
-            for (int i = 0; i < memory.Length; i++)
-            {
-                opCode = memory[i];
-            }
+            pc = 0;
         }
 
 

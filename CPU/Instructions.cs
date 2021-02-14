@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace CPU
 {
@@ -7,7 +8,7 @@ namespace CPU
     /// </summary>
     public class Instructions{
 
-        internal static void nop()
+        internal static void nop(Cpu instance)
         {
             DebugPrinter.DebugPrint(0, "Tere");
         }
