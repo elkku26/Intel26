@@ -2,7 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using static CPU.Registers;
+using static CPU.InstructionSet;
+using CPU;
 
 namespace CPU
 {
@@ -15,7 +18,6 @@ namespace CPU
         public const int H = 4;
         public const int L = 5;
         public const int A = 7;
-
 
     }
 
@@ -30,7 +32,7 @@ namespace CPU
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            DebugPrinter.DebugPrint(opcode: B);
+            //DebugPrinter.DebugPrint(B);
             Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program/", "TST8080.COM");
             cpu.InitSystem();
         }
@@ -44,10 +46,10 @@ namespace CPU
     { 
         private readonly string _runDirectory;
         private readonly string _binName;
+        private int _opCode;
         public byte[] Memory;
         public byte[] Registers;
-        public int PC;
-        private int OpCode;
+        public int Pc;
         /// <summary>
         /// Constructor for the CPU Class
         /// </summary>
@@ -82,11 +84,49 @@ namespace CPU
             Memory = LoadData(_runDirectory + _binName);
 
             Registers = new byte[7];
+
+            Pc = 0;
+            
+            while (true)
+            {
+                Step();
+            }
         }
 
-        public void Step()
+        private void Step()
         {
-            PC = 0;
+
+            _opCode = Memory[Pc];
+            Debug.WriteLine(_opCode);
+
+            //If the four most significant bits are 0000...
+            if ((_opCode | 0x0F) == 0x0F)
+            {
+                //If the two most significant bits are 00
+                if ((_opCode | 0x3F) == 0x3F)
+                {
+                    Instructions.Nop(this);
+                }
+                
+                //If the two most significant bits are 11
+
+                if ((_opCode & 0xC0) == 0xC0)
+                {
+                    //How about the third and fourth?
+                    switch (_opCode ^ 0x30)
+                    {
+                        case 0xF0:
+                            Instructions.Rnz(this);
+
+                            break;
+                    }
+
+
+                }
+            }
+
+
+            Pc += 1;
         }
 
     }

@@ -1,14 +1,14 @@
 using System;
-using System.Diagnostics;
+using System.Net;
+using static CPU.InstructionSet;
 
 namespace CPU
 {
 
-
-
-    struct InstructionSet
+    readonly struct InstructionSet
     {
-        public const int Nop = 0x00;
+        public const int NOP = 0x00;
+        public const int RNZ = 0xC0;
     }
 
     /// <summary>
@@ -19,8 +19,14 @@ namespace CPU
 
         internal static void Nop(Cpu instance)
         {
-            DebugPrinter.DebugPrint(0, "Tere");
+            DebugPrinter.DebugPrint(NOP, instance);
         }
+        
+        internal static void Rnz(Cpu instance)
+        {
+            DebugPrinter.DebugPrint(RNZ, instance);
+        }
+        
 
     }
 }

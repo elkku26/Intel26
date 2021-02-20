@@ -39,7 +39,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="CPU.cs" />
-        <Compile Include="DebugPrint.cs" />
+        <Compile Include="DebugHelper.cs" />
         <Compile Include="Instructions.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
