@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Runtime.CompilerServices;
-using static CPU.Registers;
-using static CPU.InstructionSet;
-using CPU;
 
 namespace CPU
 {
@@ -32,7 +27,6 @@ namespace CPU
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            //DebugPrinter.DebugPrint(B);
             Cpu cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Program/", "TST8080.COM");
             cpu.InitSystem();
         }

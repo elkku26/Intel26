@@ -1,6 +1,5 @@
-using System;
-using System.Net;
 using static CPU.InstructionSet;
+using static CPU.DebugPrinter;
 
 namespace CPU
 {
@@ -19,12 +18,12 @@ namespace CPU
 
         internal static void Nop(Cpu instance)
         {
-            DebugPrinter.DebugPrint(NOP, instance);
+            DebugPrint(NOP, instance);
         }
         
         internal static void Rnz(Cpu instance)
         {
-            DebugPrinter.DebugPrint(RNZ, instance);
+            DebugPrint(RNZ, instance);
         }
         
 
