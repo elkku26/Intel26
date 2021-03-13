@@ -535,28 +535,28 @@ namespace CPU
 
             throw new NotImplementedException("Unimplemented LDAX");
         }
-        
+
         internal static void Cma(Cpu cpu)
         {
             DebugPrint("CMA", cpu);
 
             throw new NotImplementedException("Unimplemented CMA");
         }
-        
+
         internal static void Push(Cpu cpu)
         {
             DebugPrint("PUSH", cpu);
 
             throw new NotImplementedException("Unimplemented PUSH");
         }
-        
+
         internal static void Rst(Cpu cpu)
         {
             DebugPrint("RST", cpu);
 
             throw new NotImplementedException("Unimplemented RST");
         }
-        
+
         internal static void Pchl(Cpu cpu)
         {
             DebugPrint("PCHL", cpu);

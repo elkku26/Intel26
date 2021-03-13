@@ -16,7 +16,7 @@ namespace CPU
         /// <param name="message">A string containing any arbitrary data the programmer wants displayed</param>
         public static void DebugPrint(string opcode, Cpu instance, string message = "")
         {
-            Debug.WriteLine("Instruction: {0}\nPC: {1}", opcode, instance.Pc);
+            Debug.WriteLine("PC: {1}\nInstruction: {0}", opcode, instance.Pc);
             Debug.WriteLine(message + '\n');
         }
     }
