@@ -243,7 +243,7 @@ namespace CPU
 
         internal static void Adi(Cpu cpu)
         {
-            DebugPrint("ACI", cpu);
+            DebugPrint("ADI", cpu);
 
             throw new NotImplementedException("Unimplemented ACI");
         }
@@ -398,9 +398,9 @@ namespace CPU
 
         internal static void Call(Cpu cpu)
         {
-            DebugPrint("LDA", cpu);
+            DebugPrint("CALL", cpu);
 
-            throw new NotImplementedException("Unimplemented LDA");
+            throw new NotImplementedException("Unimplemented CALL");
         }
 
         internal static void Cnz(Cpu cpu)
@@ -426,16 +426,16 @@ namespace CPU
 
         internal static void Cc(Cpu cpu)
         {
-            DebugPrint("CCC", cpu);
+            DebugPrint("CC", cpu);
 
-            throw new NotImplementedException("Unimplemented CCC");
+            throw new NotImplementedException("Unimplemented CC");
         }
 
         internal static void Cpo(Cpu cpu)
         {
-            DebugPrint("CCC", cpu);
+            DebugPrint("CPO", cpu);
 
-            throw new NotImplementedException("Unimplemented CCC");
+            throw new NotImplementedException("Unimplemented CPO");
         }
 
         internal static void Cpe(Cpu cpu)
@@ -475,9 +475,9 @@ namespace CPU
 
         internal static void Rc(Cpu cpu)
         {
-            DebugPrint("RZ", cpu);
+            DebugPrint("RC", cpu);
 
-            throw new NotImplementedException("Unimplemented RZ");
+            throw new NotImplementedException("Unimplemented RC");
         }
 
         internal static void Rpe(Cpu cpu)
@@ -534,6 +534,34 @@ namespace CPU
             DebugPrint("LDAX", cpu);
 
             throw new NotImplementedException("Unimplemented LDAX");
+        }
+        
+        internal static void Cma(Cpu cpu)
+        {
+            DebugPrint("CMA", cpu);
+
+            throw new NotImplementedException("Unimplemented CMA");
+        }
+        
+        internal static void Push(Cpu cpu)
+        {
+            DebugPrint("PUSH", cpu);
+
+            throw new NotImplementedException("Unimplemented PUSH");
+        }
+        
+        internal static void Rst(Cpu cpu)
+        {
+            DebugPrint("RST", cpu);
+
+            throw new NotImplementedException("Unimplemented RST");
+        }
+        
+        internal static void Pchl(Cpu cpu)
+        {
+            DebugPrint("PCHL", cpu);
+
+            throw new NotImplementedException("Unimplemented PCHL");
         }
     }
 }
