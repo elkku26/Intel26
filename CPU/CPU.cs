@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-
 namespace CPU
 {
+    
     internal readonly struct Registers
     {
         public const int B = 0;
@@ -14,6 +14,14 @@ namespace CPU
         public const int L = 5;
         public const int A = 7;
     }
+    
+    internal readonly struct RegisterPairs
+    {
+        public const int B = 0;
+        public const int D = 1;
+        public const int H = 2;
+    }
+
 
     /// <summary>
     ///     Prepares the CPU for initialization by reading config files etc.
@@ -41,7 +49,7 @@ namespace CPU
         private byte _opCodeByte;
         public byte[] Memory;
         public int Pc;
-        public byte[] Registers;
+        public byte[] CpuRegister;
         /// <summary>
         ///     Constructor for the CPU Class
         /// </summary>
@@ -64,7 +72,7 @@ namespace CPU
             Memory = new byte[64000];
             var programData = File.ReadAllBytes(path);
             Array.Copy(programData, 0, Memory, 0, programData.Length);
-
+            Debug.WriteLine("Load succesful");
             return Memory;
         }
 
@@ -73,1919 +81,1991 @@ namespace CPU
         /// </summary>
         public void InitSystem()
         {
+            
             Memory = LoadData(_runDirectory + _binName);
 
-            Registers = new byte[7];
+            CpuRegister = new byte[7];
+            
+            Debug.WriteLine("Init successful");
 
             //temporary code for testing, not a part of the final program flow
-            for (var i = 0; i < 256; i++) Step(i);
+            while (true) {Step();}
         }
 
-        private void Step(int debugOpcode)
+        private void Step()
         {
 
-            _opCodeByte = (byte) debugOpcode;
-            //_opCodeByte = Memory[Pc];
-
-            //Debug.WriteLine("Enter an opcode (testing purposes only)");
-            //_opCodeByte = Convert.ToByte(Console.ReadLine(), 16);
+            _opCodeByte = Memory[Pc];
 
             //Debug.WriteLine("Current opcode: Hex 0x{0:X}, Bin {1}", _opCodeByte, Convert.ToString(_opCodeByte, 2).PadLeft(8, '0'));
 
 
-                switch ((_opCodeByte & 0xF0) >> 4)
-                {
-                    case 0x0:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x00
-                            case 0x0:
+            switch ((_opCodeByte & 0xF0) >> 4)
+            {
+                case 0x0:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x00
+                        case 0x0:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x01
-                            case 0x1:
+                        // 0x01
+                        case 0x1:
 
-                                Instructions.Lxi(this);
+                            Instructions.Lxi(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x02
-                            case 0x2:
+                        // 0x02
+                        case 0x2:
 
-                                Instructions.Stax(this);
+                            Instructions.Stax(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x03
-                            case 0x3:
+                        // 0x03
+                        case 0x3:
 
-                                Instructions.Inx(this);
+                            Instructions.Inx(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x04
-                            case 0x4:
+                        // 0x04
+                        case 0x4:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x05
-                            case 0x5:
+                        // 0x05
+                        case 0x5:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x06
-                            case 0x6:
+                        // 0x06
+                        case 0x6:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x07
-                            case 0x7:
+                        // 0x07
+                        case 0x7:
 
-                                Instructions.Rlc(this);
+                            Instructions.Rlc(this);
 
-                                break;
+                            break;
 
-                            // 0x08
-                            case 0x8:
+                        // 0x08
+                        case 0x8:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x09
-                            case 0x9:
+                        // 0x09
+                        case 0x9:
 
-                                Instructions.Dad(this);
+                            Instructions.Dad(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x0A
-                            case 0xA:
+                        // 0x0A
+                        case 0xA:
 
-                                Instructions.Ldax(this);
+                            Instructions.Ldax(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x0B
-                            case 0xB:
+                        // 0x0B
+                        case 0xB:
 
-                                Instructions.Dcx(this);
+                            Instructions.Dcx(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0x0C
-                            case 0xC:
+                        // 0x0C
+                        case 0xC:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x0D
-                            case 0xD:
+                        // 0x0D
+                        case 0xD:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x0E
-                            case 0xE:
+                        // 0x0E
+                        case 0xE:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x0F
-                            case 0xF:
+                        // 0x0F
+                        case 0xF:
 
-                                Instructions.Rrc(this);
+                            Instructions.Rrc(this);
 
-                                break;
-                        }
+                            break;
+                    }
 
-                        break;
+                    break;
 
-                    case 0x1:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x10
-                            case 0x0:
+                case 0x1:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x10
+                        case 0x0:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x11
-                            case 0x1:
+                        // 0x11
+                        case 0x1:
 
-                                Instructions.Lxi(this);
+                            Instructions.Lxi(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x12
-                            case 0x2:
+                        // 0x12
+                        case 0x2:
 
-                                Instructions.Stax(this);
+                            Instructions.Stax(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x13
-                            case 0x3:
+                        // 0x13
+                        case 0x3:
 
-                                Instructions.Inx(this);
+                            Instructions.Inx(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x14
-                            case 0x4:
+                        // 0x14
+                        case 0x4:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x15
-                            case 0x5:
+                        // 0x15
+                        case 0x5:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x16
-                            case 0x6:
+                        // 0x16
+                        case 0x6:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x17
-                            case 0x7:
+                        // 0x17
+                        case 0x7:
 
-                                Instructions.Ral(this);
+                            Instructions.Ral(this);
 
-                                break;
+                            break;
 
-                            // 0x18
-                            case 0x8:
+                        // 0x18
+                        case 0x8:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x19
-                            case 0x9:
+                        // 0x19
+                        case 0x9:
 
-                                Instructions.Dad(this);
+                            Instructions.Dad(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x1A
-                            case 0xA:
+                        // 0x1A
+                        case 0xA:
 
-                                Instructions.Ldax(this);
+                            Instructions.Ldax(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x1B
-                            case 0xB:
+                        // 0x1B
+                        case 0xB:
 
-                                Instructions.Dcx(this);
+                            Instructions.Dcx(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0x1C
-                            case 0xC:
+                        // 0x1C
+                        case 0xC:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x1D
-                            case 0xD:
+                        // 0x1D
+                        case 0xD:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x1E
-                            case 0xE:
+                        // 0x1E
+                        case 0xE:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x1F
-                            case 0xF:
+                        // 0x1F
+                        case 0xF:
 
-                                Instructions.Rar(this);
+                            Instructions.Rar(this);
 
-                                break;
-                        }
+                            break;
+                    }
 
-                        break;
+                    break;
 
-                    case 0x2:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x20
-                            case 0x0:
+                case 0x2:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x20
+                        case 0x0:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x21
-                            case 0x1:
+                        // 0x21
+                        case 0x1:
 
-                                Instructions.Lxi(this);
+                            Instructions.Lxi(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0x22
-                            case 0x2:
+                        // 0x22
+                        case 0x2:
 
-                                Instructions.Shld(this);
+                            Instructions.Shld(this);
 
-                                break;
+                            break;
 
-                            // 0x23
-                            case 0x3:
+                        // 0x23
+                        case 0x3:
 
-                                Instructions.Inx(this);
+                            Instructions.Inx(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0x24
-                            case 0x4:
+                        // 0x24
+                        case 0x4:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x25
-                            case 0x5:
+                        // 0x25
+                        case 0x5:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x26
-                            case 0x6:
+                        // 0x26
+                        case 0x6:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x27
-                            case 0x7:
+                        // 0x27
+                        case 0x7:
 
-                                Instructions.Daa(this);
+                            Instructions.Daa(this);
 
-                                break;
+                            break;
 
-                            // 0x28
-                            case 0x8:
+                        // 0x28
+                        case 0x8:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x29
-                            case 0x9:
+                        // 0x29
+                        case 0x9:
 
-                                Instructions.Dad(this);
+                            Instructions.Dad(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0x2A
-                            case 0xA:
+                        // 0x2A
+                        case 0xA:
 
-                                Instructions.Lhld(this);
+                            Instructions.Lhld(this);
 
-                                break;
+                            break;
 
-                            // 0x2B
-                            case 0xB:
+                        // 0x2B
+                        case 0xB:
 
-                                Instructions.Dcx(this);
+                            Instructions.Dcx(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0x2C
-                            case 0xC:
+                        // 0x2C
+                        case 0xC:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x2D
-                            case 0xD:
+                        // 0x2D
+                        case 0xD:
 
-                                Instructions.Dcr(this);
+                            Instructions.Dcr(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x2E
-                            case 0xE:
+                        // 0x2E
+                        case 0xE:
 
-                                Instructions.Mvi(this);
+                            Instructions.Mvi(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x2F
-                            case 0xF:
+                        // 0x2F
+                        case 0xF:
 
-                                Instructions.Cma(this);
+                            Instructions.Cma(this);
 
-                                break;
-                        }
+                            break;
+                    }
 
-                        break;
+                    break;
 
-                    case 0x3:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x30
-                            case 0x0:
+                case 0x3:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x30
+                        case 0x0:
 
-                                Instructions.Nop(this);
+                            Instructions.Nop(this);
 
-                                break;
+                            break;
 
-                            // 0x31
-                            case 0x1:
+                        // 0x31
+                        case 0x1:
+                            
+                            //TODO: Register passed as 0 temporarily even though it should be SP, check this later
+                            Instructions.Lxi(this, 0);
 
-                                Instructions.Lxi(this);
+                            break;
 
-                                break;
+                        // 0x32
+                        case 0x2:
 
-                            // 0x32
-                            case 0x2:
+                            Instructions.Sta(this);
 
-                                Instructions.Sta(this);
+                            break;
 
-                                break;
+                        // 0x33
+                        case 0x3:
 
-                            // 0x33
-                            case 0x3:
+                            //TODO: Register pair passed as 0 temporarily even though it should be SP, check this later
+                            Instructions.Inx(this, 0);
 
-                                Instructions.Inx(this);
+                            break;
 
-                                break;
+                        // 0x34
+                        case 0x4:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            // 0x34
-                            case 0x4:
 
-                                Instructions.Inr(this);
+                            Instructions.Inr(this, 0);
 
-                                break;
+                            break;
 
-                            // 0x35
-                            case 0x5:
+                        // 0x35
+                        case 0x5:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                Instructions.Dcr(this);
 
-                                break;
+                            Instructions.Dcr(this, 0);
 
-                            // 0x36
-                            case 0x6:
+                            break;
 
-                                Instructions.Mvi(this);
+                        // 0x36
+                        case 0x6:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                break;
 
-                            // 0x37
-                            case 0x7:
+                            Instructions.Mvi(this, 0);
 
-                                Instructions.Stc(this);
+                            break;
 
-                                break;
+                        // 0x37
+                        case 0x7:
 
-                            // 0x38
-                            case 0x8:
+                            Instructions.Stc(this);
 
-                                Instructions.Nop(this);
+                            break;
 
-                                break;
+                        // 0x38
+                        case 0x8:
 
-                            // 0x39
-                            case 0x9:
+                            Instructions.Nop(this);
 
-                                Instructions.Dad(this);
+                            break;
 
-                                break;
+                        // 0x39
+                        case 0x9:
 
-                            // 0x3A
-                            case 0xA:
+                            //TODO: register should be SP but I haven't figured out what that is yet
 
-                                Instructions.Lda(this);
+                            Instructions.Dad(this, 0);
 
-                                break;
+                            break;
 
-                            // 0x3B
-                            case 0xB:
+                        // 0x3A
+                        case 0xA:
 
-                                Instructions.Dcx(this);
+                            Instructions.Lda(this);
 
-                                break;
+                            break;
 
-                            // 0x3C
-                            case 0xC:
+                        // 0x3B
+                        case 0xB:
 
-                                Instructions.Inr(this);
+                            //TODO: registerPair should be SP but I haven't figured out what that is yet
 
-                                break;
+                            Instructions.Dcx(this, 0);
 
-                            // 0x3D
-                            case 0xD:
+                            break;
 
-                                Instructions.Dcr(this);
+                        // 0x3C
+                        case 0xC:
 
-                                break;
+                            Instructions.Inr(this, Registers.A);
 
-                            // 0x3E
-                            case 0xE:
+                            break;
 
-                                Instructions.Mvi(this);
+                        // 0x3D
+                        case 0xD:
 
-                                break;
+                            Instructions.Dcr(this, Registers.A);
 
-                            // 0x3F
-                            case 0xF:
+                            break;
 
-                                Instructions.Cmc(this);
+                        // 0x3E
+                        case 0xE:
 
-                                break;
-                        }
+                            Instructions.Mvi(this, Registers.A);
 
-                        break;
+                            break;
 
-                    case 0x4:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x40
-                            case 0x0:
+                        // 0x3F
+                        case 0xF:
 
-                                Instructions.Mov(this);
+                            Instructions.Cmc(this);
 
-                                break;
+                            break;
+                    }
 
-                            // 0x41
-                            case 0x1:
+                    break;
 
-                                Instructions.Mov(this);
+                case 0x4:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x40
+                        case 0x0:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.B);
 
-                            // 0x42
-                            case 0x2:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x41
+                        case 0x1:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.C);
 
-                            // 0x43
-                            case 0x3:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x42
+                        case 0x2:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.D);
 
-                            // 0x44
-                            case 0x4:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x43
+                        case 0x3:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.E);
 
-                            // 0x45
-                            case 0x5:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x44
+                        case 0x4:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.H);
 
-                            // 0x46
-                            case 0x6:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x45
+                        case 0x5:
 
-                                break;
+                            Instructions.Mov(this, Registers.B, Registers.L);
 
-                            // 0x47
-                            case 0x7:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x46
+                        case 0x6:
+                            
+                            //TODO: dst should be M but I haven't figured out what that is yet
+                            Instructions.Mov(this, Registers.B, 0);
 
-                                break;
+                            break;
 
-                            // 0x48
-                            case 0x8:
+                        // 0x47
+                        case 0x7:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.B, Registers.A);
 
-                                break;
+                            break;
 
-                            // 0x49
-                            case 0x9:
+                        // 0x48
+                        case 0x8:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x4A
-                            case 0xA:
+                        // 0x49
+                        case 0x9:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x4B
-                            case 0xB:
+                        // 0x4A
+                        case 0xA:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x4C
-                            case 0xC:
+                        // 0x4B
+                        case 0xB:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x4D
-                            case 0xD:
+                        // 0x4C
+                        case 0xC:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x4E
-                            case 0xE:
+                        // 0x4D
+                        case 0xD:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x4F
-                            case 0xF:
+                        // 0x4E
+                        case 0xE:
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                                Instructions.Mov(this);
 
-                                break;
-                        }
+                            Instructions.Mov(this, Registers.C, 0);
 
-                        break;
+                            break;
 
-                    case 0x5:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x50
-                            case 0x0:
+                        // 0x4F
+                        case 0xF:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.C, Registers.A);
 
-                                break;
+                            break;
+                    }
 
-                            // 0x51
-                            case 0x1:
+                    break;
 
-                                Instructions.Mov(this);
+                case 0x5:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x50
+                        case 0x0:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.B);
 
-                            // 0x52
-                            case 0x2:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x51
+                        case 0x1:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.C);
 
-                            // 0x53
-                            case 0x3:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x52
+                        case 0x2:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.D);
 
-                            // 0x54
-                            case 0x4:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x53
+                        case 0x3:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.E);
 
-                            // 0x55
-                            case 0x5:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x54
+                        case 0x4:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.H);
 
-                            // 0x56
-                            case 0x6:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x55
+                        case 0x5:
 
-                                break;
+                            Instructions.Mov(this, Registers.D, Registers.L);
 
-                            // 0x57
-                            case 0x7:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x56
+                        case 0x6:
 
-                                break;
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                            // 0x58
-                            case 0x8:
+                            Instructions.Mov(this, Registers.D, 0);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x57
+                        case 0x7:
 
-                            // 0x59
-                            case 0x9:
+                            Instructions.Mov(this, Registers.D, Registers.A);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x58
+                        case 0x8:
 
-                            // 0x5A
-                            case 0xA:
+                            Instructions.Mov(this, Registers.E, Registers.B);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x59
+                        case 0x9:
 
-                            // 0x5B
-                            case 0xB:
+                            Instructions.Mov(this, Registers.E, Registers.C);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x5A
+                        case 0xA:
 
-                            // 0x5C
-                            case 0xC:
+                            Instructions.Mov(this, Registers.E, Registers.D);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x5B
+                        case 0xB:
 
-                            // 0x5D
-                            case 0xD:
+                            Instructions.Mov(this, Registers.E, Registers.E);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x5C
+                        case 0xC:
 
-                            // 0x5E
-                            case 0xE:
+                            Instructions.Mov(this, Registers.E, Registers.H);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x5D
+                        case 0xD:
 
-                            // 0x5F
-                            case 0xF:
+                            Instructions.Mov(this, Registers.E, Registers.L);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
-                        }
+                        // 0x5E
+                        case 0xE:
 
-                        break;
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                    case 0x6:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x60
-                            case 0x0:
+                            Instructions.Mov(this, Registers.E, 0);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x5F
+                        case 0xF:
 
-                            // 0x61
-                            case 0x1:
+                            Instructions.Mov(this, Registers.E, Registers.A);
 
-                                Instructions.Mov(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0x62
-                            case 0x2:
+                case 0x6:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x60
+                        case 0x0:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x63
-                            case 0x3:
+                        // 0x61
+                        case 0x1:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x64
-                            case 0x4:
+                        // 0x62
+                        case 0x2:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x65
-                            case 0x5:
+                        // 0x63
+                        case 0x3:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x66
-                            case 0x6:
+                        // 0x64
+                        case 0x4:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x67
-                            case 0x7:
+                        // 0x65
+                        case 0x5:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, Registers.H, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x68
-                            case 0x8:
+                        // 0x66
+                        case 0x6:
+                            
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                                Instructions.Mov(this);
 
-                                break;
+                            Instructions.Mov(this, Registers.H, 0);
 
-                            // 0x69
-                            case 0x9:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x67
+                        case 0x7:
 
-                                break;
+                            Instructions.Mov(this, Registers.H, Registers.A);
 
-                            // 0x6A
-                            case 0xA:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x68
+                        case 0x8:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.B);
 
-                            // 0x6B
-                            case 0xB:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x69
+                        case 0x9:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.C);
 
-                            // 0x6C
-                            case 0xC:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x6A
+                        case 0xA:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.D);
 
-                            // 0x6D
-                            case 0xD:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x6B
+                        case 0xB:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.E);
 
-                            // 0x6E
-                            case 0xE:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x6C
+                        case 0xC:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.H);
 
-                            // 0x6F
-                            case 0xF:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x6D
+                        case 0xD:
 
-                                break;
-                        }
+                            Instructions.Mov(this, Registers.L, Registers.L);
 
-                        break;
+                            break;
 
-                    case 0x7:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x70
-                            case 0x0:
+                        // 0x6E
+                        case 0xE:
+                            
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                                Instructions.Mov(this);
 
-                                break;
+                            Instructions.Mov(this, Registers.L, 0);
 
-                            // 0x71
-                            case 0x1:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x6F
+                        case 0xF:
 
-                                break;
+                            Instructions.Mov(this, Registers.L, Registers.A);
 
-                            // 0x72
-                            case 0x2:
+                            break;
+                    }
 
-                                Instructions.Mov(this);
+                    break;
 
-                                break;
+                case 0x7:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x70
+                        case 0x0:
+                            
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                            // 0x73
-                            case 0x3:
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, 0, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x74
-                            case 0x4:
+                        // 0x71
+                        case 0x1:
 
-                                Instructions.Mov(this);
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                break;
+                            Instructions.Mov(this, 0, Registers.C);
 
-                            // 0x75
-                            case 0x5:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x72
+                        case 0x2:
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                break;
+                            Instructions.Mov(this, 0, Registers.D);
 
-                            // 0x76
-                            case 0x6:
+                            break;
 
-                                Instructions.Hlt(this);
+                        // 0x73
+                        case 0x3:
+                            
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                break;
 
-                            // 0x77
-                            case 0x7:
+                            Instructions.Mov(this, 0, Registers.E);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x74
+                        case 0x4:
 
-                            // 0x78
-                            case 0x8:
+                            
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                Instructions.Mov(this);
+                            Instructions.Mov(this, 0, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x79
-                            case 0x9:
+                        // 0x75
+                        case 0x5:
+                            
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                Instructions.Mov(this);
 
-                                break;
+                            Instructions.Mov(this, 0, Registers.L);
 
-                            // 0x7A
-                            case 0xA:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x76
+                        case 0x6:
 
-                                break;
+                            Instructions.Hlt(this);
 
-                            // 0x7B
-                            case 0xB:
+                            break;
 
-                                Instructions.Mov(this);
+                        // 0x77
+                        case 0x7:
+                            
+                            //TODO: src should be M but I haven't figured out what that is yet
 
-                                break;
 
-                            // 0x7C
-                            case 0xC:
+                            Instructions.Mov(this, 0, Registers.A);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x78
+                        case 0x8:
 
-                            // 0x7D
-                            case 0xD:
+                            Instructions.Mov(this, Registers.A, Registers.B);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x79
+                        case 0x9:
 
-                            // 0x7E
-                            case 0xE:
+                            Instructions.Mov(this, Registers.A, Registers.C);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
+                        // 0x7A
+                        case 0xA:
 
-                            // 0x7F
-                            case 0xF:
+                            Instructions.Mov(this, Registers.A, Registers.D);
 
-                                Instructions.Mov(this);
+                            break;
 
-                                break;
-                        }
+                        // 0x7B
+                        case 0xB:
 
-                        break;
+                            Instructions.Mov(this, Registers.A, Registers.E);
 
-                    case 0x8:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x80
-                            case 0x0:
+                            break;
 
-                                Instructions.Add(this);
+                        // 0x7C
+                        case 0xC:
 
-                                break;
+                            Instructions.Mov(this, Registers.A, Registers.H);
 
-                            // 0x81
-                            case 0x1:
+                            break;
 
-                                Instructions.Add(this);
+                        // 0x7D
+                        case 0xD:
 
-                                break;
+                            Instructions.Mov(this, Registers.A, Registers.L);
 
-                            // 0x82
-                            case 0x2:
+                            break;
 
-                                Instructions.Add(this);
+                        // 0x7E
+                        case 0xE:
+                            
+                            //TODO: dst should be M but I haven't figured out what that is yet
 
-                                break;
 
-                            // 0x83
-                            case 0x3:
+                            Instructions.Mov(this, Registers.A, 0);
 
-                                Instructions.Add(this);
+                            break;
 
-                                break;
+                        // 0x7F
+                        case 0xF:
 
-                            // 0x84
-                            case 0x4:
+                            Instructions.Mov(this, Registers.A, Registers.A);
 
-                                Instructions.Add(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0x85
-                            case 0x5:
+                case 0x8:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x80
+                        case 0x0:
 
-                                Instructions.Add(this);
+                            Instructions.Add(this, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0x86
-                            case 0x6:
+                        // 0x81
+                        case 0x1:
 
-                                Instructions.Add(this);
+                            Instructions.Add(this, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0x87
-                            case 0x7:
+                        // 0x82
+                        case 0x2:
 
-                                Instructions.Add(this);
+                            Instructions.Add(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0x88
-                            case 0x8:
+                        // 0x83
+                        case 0x3:
 
-                                Instructions.Adc(this);
+                            Instructions.Add(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x89
-                            case 0x9:
+                        // 0x84
+                        case 0x4:
 
-                                Instructions.Adc(this);
+                            Instructions.Add(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x8A
-                            case 0xA:
+                        // 0x85
+                        case 0x5:
 
-                                Instructions.Adc(this);
+                            Instructions.Add(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x8B
-                            case 0xB:
+                        // 0x86
+                        case 0x6:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                Instructions.Adc(this);
 
-                                break;
+                            Instructions.Add(this, 0);
 
-                            // 0x8C
-                            case 0xC:
+                            break;
 
-                                Instructions.Adc(this);
+                        // 0x87
+                        case 0x7:
 
-                                break;
+                            Instructions.Add(this, Registers.A);
 
-                            // 0x8D
-                            case 0xD:
+                            break;
 
-                                Instructions.Adc(this);
+                        // 0x88
+                        case 0x8:
 
-                                break;
+                            Instructions.Adc(this, Registers.B);
 
-                            // 0x8E
-                            case 0xE:
+                            break;
 
-                                Instructions.Adc(this);
+                        // 0x89
+                        case 0x9:
 
-                                break;
+                            Instructions.Adc(this, Registers.C);
 
-                            // 0x8F
-                            case 0xF:
+                            break;
 
-                                Instructions.Adc(this);
+                        // 0x8A
+                        case 0xA:
 
-                                break;
-                        }
+                            Instructions.Adc(this, Registers.D);
 
-                        break;
+                            break;
 
-                    case 0x9:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0x90
-                            case 0x0:
+                        // 0x8B
+                        case 0xB:
 
-                                Instructions.Sub(this);
+                            Instructions.Adc(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0x91
-                            case 0x1:
+                        // 0x8C
+                        case 0xC:
 
-                                Instructions.Sub(this);
+                            Instructions.Adc(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0x92
-                            case 0x2:
+                        // 0x8D
+                        case 0xD:
 
-                                Instructions.Sub(this);
+                            Instructions.Adc(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0x93
-                            case 0x3:
+                        // 0x8E
+                        case 0xE:
 
-                                Instructions.Sub(this);
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                break;
+                            
+                            Instructions.Adc(this, 0);
 
-                            // 0x94
-                            case 0x4:
+                            break;
 
-                                Instructions.Sub(this);
+                        // 0x8F
+                        case 0xF:
 
-                                break;
+                            Instructions.Adc(this, Registers.A);
 
-                            // 0x95
-                            case 0x5:
+                            break;
+                    }
 
-                                Instructions.Sub(this);
+                    break;
 
-                                break;
+                case 0x9:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0x90
+                        case 0x0:
 
-                            // 0x96
-                            case 0x6:
+                            Instructions.Sub(this, Registers.B);
 
-                                Instructions.Sub(this);
+                            break;
 
-                                break;
+                        // 0x91
+                        case 0x1:
 
-                            // 0x97
-                            case 0x7:
+                            Instructions.Sub(this, Registers.C);
 
-                                Instructions.Sub(this);
+                            break;
 
-                                break;
+                        // 0x92
+                        case 0x2:
 
-                            // 0x98
-                            case 0x8:
+                            Instructions.Sub(this, Registers.D);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x93
+                        case 0x3:
 
-                            // 0x99
-                            case 0x9:
+                            Instructions.Sub(this, Registers.E);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x94
+                        case 0x4:
 
-                            // 0x9A
-                            case 0xA:
+                            Instructions.Sub(this, Registers.H);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x95
+                        case 0x5:
 
-                            // 0x9B
-                            case 0xB:
+                            Instructions.Sub(this, Registers.L);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x96
+                        case 0x6:
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            // 0x9C
-                            case 0xC:
+                            Instructions.Sub(this, 0);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x97
+                        case 0x7:
 
-                            // 0x9D
-                            case 0xD:
+                            Instructions.Sub(this, Registers.A);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x98
+                        case 0x8:
 
-                            // 0x9E
-                            case 0xE:
+                            Instructions.Sbb(this, Registers.B);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
+                        // 0x99
+                        case 0x9:
 
-                            // 0x9F
-                            case 0xF:
+                            Instructions.Sbb(this, Registers.C);
 
-                                Instructions.Sbb(this);
+                            break;
 
-                                break;
-                        }
+                        // 0x9A
+                        case 0xA:
 
-                        break;
+                            Instructions.Sbb(this, Registers.D);
 
-                    case 0xA:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xA0
-                            case 0x0:
+                            break;
 
-                                Instructions.Ana(this);
+                        // 0x9B
+                        case 0xB:
 
-                                break;
+                            Instructions.Sbb(this, Registers.E);
 
-                            // 0xA1
-                            case 0x1:
+                            break;
 
-                                Instructions.Ana(this);
+                        // 0x9C
+                        case 0xC:
 
-                                break;
+                            Instructions.Sbb(this, Registers.H);
 
-                            // 0xA2
-                            case 0x2:
+                            break;
 
-                                Instructions.Ana(this);
+                        // 0x9D
+                        case 0xD:
 
-                                break;
+                            Instructions.Sbb(this, Registers.L);
 
-                            // 0xA3
-                            case 0x3:
+                            break;
 
-                                Instructions.Ana(this);
+                        // 0x9E
+                        case 0xE:
 
-                                break;
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            // 0xA4
-                            case 0x4:
+                            
+                            Instructions.Sbb(this, 0);
 
-                                Instructions.Ana(this);
+                            break;
 
-                                break;
+                        // 0x9F
+                        case 0xF:
 
-                            // 0xA5
-                            case 0x5:
+                            Instructions.Sbb(this, Registers.A);
 
-                                Instructions.Ana(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0xA6
-                            case 0x6:
+                case 0xA:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xA0
+                        case 0x0:
 
-                                Instructions.Ana(this);
+                            Instructions.Ana(this, Registers.B);
 
-                                break;
+                            break;
 
-                            // 0xA7
-                            case 0x7:
+                        // 0xA1
+                        case 0x1:
 
-                                Instructions.Ana(this);
+                            Instructions.Ana(this, Registers.C);
 
-                                break;
+                            break;
 
-                            // 0xA8
-                            case 0x8:
+                        // 0xA2
+                        case 0x2:
 
-                                Instructions.Xra(this);
+                            Instructions.Ana(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0xA9
-                            case 0x9:
+                        // 0xA3
+                        case 0x3:
 
-                                Instructions.Xra(this);
+                            Instructions.Ana(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0xAA
-                            case 0xA:
+                        // 0xA4
+                        case 0x4:
 
-                                Instructions.Xra(this);
+                            Instructions.Ana(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0xAB
-                            case 0xB:
+                        // 0xA5
+                        case 0x5:
 
-                                Instructions.Xra(this);
+                            Instructions.Ana(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0xAC
-                            case 0xC:
+                        // 0xA6
+                        case 0x6:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                Instructions.Xra(this);
 
-                                break;
+                            Instructions.Ana(this, 0);
 
-                            // 0xAD
-                            case 0xD:
+                            break;
 
-                                Instructions.Xra(this);
+                        // 0xA7
+                        case 0x7:
 
-                                break;
+                            Instructions.Ana(this, Registers.A);
 
-                            // 0xAE
-                            case 0xE:
+                            break;
 
-                                Instructions.Xra(this);
+                        // 0xA8
+                        case 0x8:
 
-                                break;
+                            Instructions.Xra(this, Registers.B);
 
-                            // 0xAF
-                            case 0xF:
+                            break;
 
-                                Instructions.Xra(this);
+                        // 0xA9
+                        case 0x9:
 
-                                break;
-                        }
+                            Instructions.Xra(this, Registers.C);
 
-                        break;
+                            break;
 
-                    case 0xB:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xB0
-                            case 0x0:
+                        // 0xAA
+                        case 0xA:
 
-                                Instructions.Ora(this);
+                            Instructions.Xra(this, Registers.D);
 
-                                break;
+                            break;
 
-                            // 0xB1
-                            case 0x1:
+                        // 0xAB
+                        case 0xB:
 
-                                Instructions.Ora(this);
+                            Instructions.Xra(this, Registers.E);
 
-                                break;
+                            break;
 
-                            // 0xB2
-                            case 0x2:
+                        // 0xAC
+                        case 0xC:
 
-                                Instructions.Ora(this);
+                            Instructions.Xra(this, Registers.H);
 
-                                break;
+                            break;
 
-                            // 0xB3
-                            case 0x3:
+                        // 0xAD
+                        case 0xD:
 
-                                Instructions.Ora(this);
+                            Instructions.Xra(this, Registers.L);
 
-                                break;
+                            break;
 
-                            // 0xB4
-                            case 0x4:
+                        // 0xAE
+                        case 0xE:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                Instructions.Ora(this);
 
-                                break;
+                            Instructions.Xra(this, 0);
 
-                            // 0xB5
-                            case 0x5:
+                            break;
 
-                                Instructions.Ora(this);
+                        // 0xAF
+                        case 0xF:
 
-                                break;
+                            Instructions.Xra(this, Registers.A);
 
-                            // 0xB6
-                            case 0x6:
+                            break;
+                    }
 
-                                Instructions.Ora(this);
+                    break;
 
-                                break;
+                case 0xB:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xB0
+                        case 0x0:
 
-                            // 0xB7
-                            case 0x7:
+                            Instructions.Ora(this, Registers.B);
 
-                                Instructions.Ora(this);
+                            break;
 
-                                break;
+                        // 0xB1
+                        case 0x1:
 
-                            // 0xB8
-                            case 0x8:
+                            Instructions.Ora(this, Registers.C);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB2
+                        case 0x2:
 
-                            // 0xB9
-                            case 0x9:
+                            Instructions.Ora(this, Registers.D);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB3
+                        case 0x3:
 
-                            // 0xBA
-                            case 0xA:
+                            Instructions.Ora(this, Registers.E);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB4
+                        case 0x4:
 
-                            // 0xBB
-                            case 0xB:
+                            Instructions.Ora(this, Registers.H);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB5
+                        case 0x5:
 
-                            // 0xBC
-                            case 0xC:
+                            Instructions.Ora(this, Registers.L);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB6
+                        case 0x6:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            // 0xBD
-                            case 0xD:
+                            Instructions.Ora(this, 0);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB7
+                        case 0x7:
 
-                            // 0xBE
-                            case 0xE:
+                            Instructions.Ora(this, Registers.A);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
+                        // 0xB8
+                        case 0x8:
 
-                            // 0xBF
-                            case 0xF:
+                            Instructions.Cmp(this, Registers.B);
 
-                                Instructions.Cmp(this);
+                            break;
 
-                                break;
-                        }
+                        // 0xB9
+                        case 0x9:
 
-                        break;
+                            Instructions.Cmp(this, Registers.C);
 
-                    case 0xC:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xC0
-                            case 0x0:
+                            break;
 
-                                Instructions.Rnz(this);
+                        // 0xBA
+                        case 0xA:
 
-                                break;
+                            Instructions.Cmp(this, Registers.D);
 
-                            // 0xC1
-                            case 0x1:
+                            break;
 
-                                Instructions.Pop(this);
+                        // 0xBB
+                        case 0xB:
 
-                                break;
+                            Instructions.Cmp(this, Registers.E);
 
-                            // 0xC2
-                            case 0x2:
+                            break;
 
-                                Instructions.Jnz(this);
+                        // 0xBC
+                        case 0xC:
 
-                                break;
+                            Instructions.Cmp(this, Registers.H);
 
-                            // 0xC3
-                            case 0x3:
+                            break;
 
-                                Instructions.Jmp(this);
+                        // 0xBD
+                        case 0xD:
 
-                                break;
+                            Instructions.Cmp(this, Registers.L);
 
-                            // 0xC4
-                            case 0x4:
+                            break;
 
-                                Instructions.Cnz(this);
+                        // 0xBE
+                        case 0xE:
+                            
+                            //TODO: register should be M but I haven't figured out what that is yet
 
-                                break;
 
-                            // 0xC5
-                            case 0x5:
+                            Instructions.Cmp(this, 0);
 
-                                Instructions.Push(this);
+                            break;
 
-                                break;
+                        // 0xBF
+                        case 0xF:
 
-                            // 0xC6
-                            case 0x6:
+                            Instructions.Cmp(this, Registers.A);
 
-                                Instructions.Adi(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0xC7
-                            case 0x7:
+                case 0xC:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xC0
+                        case 0x0:
 
-                                Instructions.Rst(this);
+                            Instructions.Rnz(this);
 
-                                break;
+                            break;
 
-                            // 0xC8
-                            case 0x8:
+                        // 0xC1
+                        case 0x1:
 
-                                Instructions.Rz(this);
+                            Instructions.Pop(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0xC9
-                            case 0x9:
+                        // 0xC2
+                        case 0x2:
 
-                                Instructions.Ret(this);
+                            Instructions.Jnz(this);
 
-                                break;
+                            break;
 
-                            // 0xCA
-                            case 0xA:
+                        // 0xC3
+                        case 0x3:
 
-                                Instructions.Jz(this);
+                            Instructions.Jmp(this);
 
-                                break;
+                            break;
 
-                            // 0xCB
-                            case 0xB:
+                        // 0xC4
+                        case 0x4:
 
-                                Instructions.Jmp(this);
+                            Instructions.Cnz(this);
 
-                                break;
+                            break;
 
-                            // 0xCC
-                            case 0xC:
+                        // 0xC5
+                        case 0x5:
 
-                                Instructions.Cz(this);
+                            Instructions.Push(this, RegisterPairs.B);
 
-                                break;
+                            break;
 
-                            // 0xCD
-                            case 0xD:
+                        // 0xC6
+                        case 0x6:
 
-                                Instructions.Call(this);
+                            Instructions.Adi(this);
 
-                                break;
+                            break;
 
-                            // 0xCE
-                            case 0xE:
+                        // 0xC7
+                        case 0x7:
 
-                                Instructions.Aci(this);
+                            Instructions.Rst(this, 0);
 
-                                break;
+                            break;
 
-                            // 0xCF
-                            case 0xF:
+                        // 0xC8
+                        case 0x8:
 
-                                Instructions.Rst(this);
+                            Instructions.Rz(this);
 
-                                break;
-                        }
+                            break;
 
-                        break;
+                        // 0xC9
+                        case 0x9:
 
-                    case 0xD:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xD0
-                            case 0x0:
+                            Instructions.Ret(this);
 
-                                Instructions.Rnc(this);
+                            break;
 
-                                break;
+                        // 0xCA
+                        case 0xA:
 
-                            // 0xD1
-                            case 0x1:
+                            Instructions.Jz(this);
 
-                                Instructions.Pop(this);
+                            break;
 
-                                break;
+                        // 0xCB
+                        case 0xB:
 
-                            // 0xD2
-                            case 0x2:
+                            Instructions.Jmp(this);
 
-                                Instructions.Jnc(this);
+                            break;
 
-                                break;
+                        // 0xCC
+                        case 0xC:
 
-                            // 0xD3
-                            case 0x3:
+                            Instructions.Cz(this);
 
-                                Instructions.Out(this);
+                            break;
 
-                                break;
+                        // 0xCD
+                        case 0xD:
 
-                            // 0xD4
-                            case 0x4:
+                            Instructions.Call(this);
 
-                                Instructions.Cnc(this);
+                            break;
 
-                                break;
+                        // 0xCE
+                        case 0xE:
 
-                            // 0xD5
-                            case 0x5:
+                            Instructions.Aci(this);
 
-                                Instructions.Push(this);
+                            break;
 
-                                break;
+                        // 0xCF
+                        case 0xF:
 
-                            // 0xD6
-                            case 0x6:
+                            Instructions.Rst(this, 1);
 
-                                Instructions.Sui(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0xD7
-                            case 0x7:
+                case 0xD:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xD0
+                        case 0x0:
 
-                                Instructions.Rst(this);
+                            Instructions.Rnc(this);
 
-                                break;
+                            break;
 
-                            // 0xD8
-                            case 0x8:
+                        // 0xD1
+                        case 0x1:
 
-                                Instructions.Rc(this);
+                            Instructions.Pop(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0xD9
-                            case 0x9:
+                        // 0xD2
+                        case 0x2:
 
-                                Instructions.Ret(this);
+                            Instructions.Jnc(this);
 
-                                break;
+                            break;
 
-                            // 0xDA
-                            case 0xA:
+                        // 0xD3
+                        case 0x3:
 
-                                Instructions.Jc(this);
+                            Instructions.Out(this);
 
-                                break;
+                            break;
 
-                            // 0xDB
-                            case 0xB:
+                        // 0xD4
+                        case 0x4:
 
-                                Instructions.In(this);
+                            Instructions.Cnc(this);
 
-                                break;
+                            break;
 
-                            // 0xDC
-                            case 0xC:
+                        // 0xD5
+                        case 0x5:
 
-                                Instructions.Cc(this);
+                            Instructions.Push(this, RegisterPairs.D);
 
-                                break;
+                            break;
 
-                            // 0xDD
-                            case 0xD:
+                        // 0xD6
+                        case 0x6:
 
-                                Instructions.Call(this);
+                            Instructions.Sui(this);
 
-                                break;
+                            break;
 
-                            // 0xDE
-                            case 0xE:
+                        // 0xD7
+                        case 0x7:
 
-                                Instructions.Sbi(this);
+                            Instructions.Rst(this, 2);
 
-                                break;
+                            break;
 
-                            // 0xDF
-                            case 0xF:
+                        // 0xD8
+                        case 0x8:
 
-                                Instructions.Rst(this);
+                            Instructions.Rc(this);
 
-                                break;
-                        }
+                            break;
 
-                        break;
+                        // 0xD9
+                        case 0x9:
 
-                    case 0xE:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xE0
-                            case 0x0:
+                            Instructions.Ret(this);
 
-                                Instructions.Rpo(this);
+                            break;
 
-                                break;
+                        // 0xDA
+                        case 0xA:
 
-                            // 0xE1
-                            case 0x1:
+                            Instructions.Jc(this);
 
-                                Instructions.Pop(this);
+                            break;
 
-                                break;
+                        // 0xDB
+                        case 0xB:
 
-                            // 0xE2
-                            case 0x2:
+                            Instructions.In(this);
 
-                                Instructions.Jpo(this);
+                            break;
 
-                                break;
+                        // 0xDC
+                        case 0xC:
 
-                            // 0xE3
-                            case 0x3:
+                            Instructions.Cc(this);
 
-                                Instructions.Xthl(this);
+                            break;
 
-                                break;
+                        // 0xDD
+                        case 0xD:
 
-                            // 0xE4
-                            case 0x4:
+                            Instructions.Call(this);
 
-                                Instructions.Cpo(this);
+                            break;
 
-                                break;
+                        // 0xDE
+                        case 0xE:
 
-                            // 0xE5
-                            case 0x5:
+                            Instructions.Sbi(this);
 
-                                Instructions.Push(this);
+                            break;
 
-                                break;
+                        // 0xDF
+                        case 0xF:
 
-                            // 0xE6
-                            case 0x6:
+                            Instructions.Rst(this, 3);
 
-                                Instructions.Ani(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0xE7
-                            case 0x7:
+                case 0xE:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xE0
+                        case 0x0:
 
-                                Instructions.Rst(this);
+                            Instructions.Rpo(this);
 
-                                break;
+                            break;
 
-                            // 0xE8
-                            case 0x8:
+                        // 0xE1
+                        case 0x1:
 
-                                Instructions.Rpe(this);
+                            Instructions.Pop(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0xE9
-                            case 0x9:
+                        // 0xE2
+                        case 0x2:
 
-                                Instructions.Pchl(this);
+                            Instructions.Jpo(this);
 
-                                break;
+                            break;
 
-                            // 0xEA
-                            case 0xA:
+                        // 0xE3
+                        case 0x3:
 
-                                Instructions.Jpe(this);
+                            Instructions.Xthl(this);
 
-                                break;
+                            break;
 
-                            // 0xEB
-                            case 0xB:
+                        // 0xE4
+                        case 0x4:
 
-                                Instructions.Xchg(this);
+                            Instructions.Cpo(this);
 
-                                break;
+                            break;
 
-                            // 0xEC
-                            case 0xC:
+                        // 0xE5
+                        case 0x5:
 
-                                Instructions.Cpe(this);
+                            Instructions.Push(this, RegisterPairs.H);
 
-                                break;
+                            break;
 
-                            // 0xED
-                            case 0xD:
+                        // 0xE6
+                        case 0x6:
 
-                                Instructions.Call(this);
+                            Instructions.Ani(this);
 
-                                break;
+                            break;
 
-                            // 0xEE
-                            case 0xE:
+                        // 0xE7
+                        case 0x7:
 
-                                Instructions.Xri(this);
+                            Instructions.Rst(this, 4);
 
-                                break;
+                            break;
 
-                            // 0xEF
-                            case 0xF:
+                        // 0xE8
+                        case 0x8:
 
-                                Instructions.Rst(this);
+                            Instructions.Rpe(this);
 
-                                break;
-                        }
+                            break;
 
-                        break;
+                        // 0xE9
+                        case 0x9:
 
-                    case 0xF:
-                        switch (_opCodeByte & 0xF)
-                        {
-                            // 0xF0
-                            case 0x0:
+                            Instructions.Pchl(this);
 
-                                Instructions.Rp(this);
+                            break;
 
-                                break;
+                        // 0xEA
+                        case 0xA:
 
-                            // 0xF1
-                            case 0x1:
+                            Instructions.Jpe(this);
 
-                                Instructions.Pop(this);
+                            break;
 
-                                break;
+                        // 0xEB
+                        case 0xB:
 
-                            // 0xF2
-                            case 0x2:
+                            Instructions.Xchg(this);
 
-                                Instructions.Jp(this);
+                            break;
 
-                                break;
+                        // 0xEC
+                        case 0xC:
 
-                            // 0xF3
-                            case 0x3:
+                            Instructions.Cpe(this);
 
-                                Instructions.Di(this);
+                            break;
 
-                                break;
+                        // 0xED
+                        case 0xD:
 
-                            // 0xF4
-                            case 0x4:
+                            Instructions.Call(this);
 
-                                Instructions.Cp(this);
+                            break;
 
-                                break;
+                        // 0xEE
+                        case 0xE:
 
-                            // 0xF5
-                            case 0x5:
+                            Instructions.Xri(this);
 
-                                Instructions.Push(this);
+                            break;
 
-                                break;
+                        // 0xEF
+                        case 0xF:
 
-                            // 0xF6
-                            case 0x6:
+                            Instructions.Rst(this, 5);
 
-                                Instructions.Ori(this);
+                            break;
+                    }
 
-                                break;
+                    break;
 
-                            // 0xF7
-                            case 0x7:
+                case 0xF:
+                    switch (_opCodeByte & 0xF)
+                    {
+                        // 0xF0
+                        case 0x0:
 
-                                Instructions.Rst(this);
+                            Instructions.Rp(this);
 
-                                break;
+                            break;
 
-                            // 0xF8
-                            case 0x8:
+                        // 0xF1
+                        case 0x1:
 
-                                Instructions.Rm(this);
+                            //TODO: registerPair should be PSW but I haven't figured out what that is yet
+                            Instructions.Pop(this, 0);
 
-                                break;
+                            break;
 
-                            // 0xF9
-                            case 0x9:
+                        // 0xF2
+                        case 0x2:
 
-                                Instructions.Sphl(this);
+                            Instructions.Jp(this);
 
-                                break;
+                            break;
 
-                            // 0xFA
-                            case 0xA:
+                        // 0xF3
+                        case 0x3:
 
-                                Instructions.Jm(this);
+                            Instructions.Di(this);
 
-                                break;
+                            break;
 
-                            // 0xFB
-                            case 0xB:
+                        // 0xF4
+                        case 0x4:
 
-                                Instructions.Ei(this);
+                            Instructions.Cp(this);
 
-                                break;
+                            break;
 
-                            // 0xFC
-                            case 0xC:
+                        // 0xF5
+                        case 0x5:
 
-                                Instructions.Cm(this);
+                            //TODO: registerPair should be PSW but I haven't figured out what that is yet
 
-                                break;
+                            Instructions.Push(this, 0);
 
-                            // 0xFD
-                            case 0xD:
+                            break;
 
-                                Instructions.Call(this);
+                        // 0xF6
+                        case 0x6:
 
-                                break;
+                            Instructions.Ori(this);
 
-                            // 0xFE
-                            case 0xE:
+                            break;
 
-                                Instructions.Cpi(this);
+                        // 0xF7
+                        case 0x7:
 
-                                break;
+                            Instructions.Rst(this, 6);
 
-                            // 0xFF
-                            case 0xF:
+                            break;
 
-                                Instructions.Rst(this);
+                        // 0xF8
+                        case 0x8:
 
-                                break;
-                        }
+                            Instructions.Rm(this);
 
-                        break;
-                }
+                            break;
 
+                        // 0xF9
+                        case 0x9:
 
+                            Instructions.Sphl(this);
 
+                            break;
+
+                        // 0xFA
+                        case 0xA:
+
+                            Instructions.Jm(this);
+
+                            break;
+
+                        // 0xFB
+                        case 0xB:
+
+                            Instructions.Ei(this);
+
+                            break;
+
+                        // 0xFC
+                        case 0xC:
+
+                            Instructions.Cm(this);
+
+                            break;
+
+                        // 0xFD
+                        case 0xD:
+
+                            Instructions.Call(this);
+
+                            break;
+
+                        // 0xFE
+                        case 0xE:
+
+                            Instructions.Cpi(this);
+
+                            break;
+
+                        // 0xFF
+                        case 0xF:
+
+                            Instructions.Rst(this, 7);
+
+                            break;
+                    }
+
+                    break;
+            }
+
+
+            //TODO: Incrementing PC like this might cause issues with things like JMP, watch out
             Pc++;
         }
     }

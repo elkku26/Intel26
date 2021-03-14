@@ -4,6 +4,8 @@ using static CPU.DebugPrinter;
 namespace CPU
 {
 
+
+
     /// <summary>
     ///     Holds all of the possible instructions
     /// </summary>
@@ -13,6 +15,130 @@ namespace CPU
         internal static void Nop(Cpu cpu)
         {
             DebugPrint("NOP", cpu);
+        }
+
+        internal static void Lxi(Cpu cpu, int registerPair)
+        {
+            DebugPrint("LXI", cpu);
+
+            throw new NotImplementedException("Unimplemented LXI");
+        }
+
+        internal static void Stax(Cpu cpu, int registerPair)
+        {
+            DebugPrint("STAX", cpu);
+
+            throw new NotImplementedException("Unimplemented STAX");
+        }
+
+        internal static void Inx(Cpu cpu, int registerPair)
+        {
+            DebugPrint("INX", cpu);
+
+            throw new NotImplementedException("Unimplemented INX");
+        }
+
+        internal static void Inr(Cpu cpu, int register)
+        {
+            DebugPrint("INR", cpu);
+
+            throw new NotImplementedException("Unimplemented INR");
+        }
+
+        internal static void Dcr(Cpu cpu, int register)
+        {
+            DebugPrint("DCR", cpu);
+
+            throw new NotImplementedException("Unimplemented DCR");
+        }
+
+        internal static void Mvi(Cpu cpu, int register)
+        {
+            DebugPrint("MVI", cpu);
+
+            throw new NotImplementedException("Unimplemented MVI");
+        }
+
+        internal static void Rlc(Cpu cpu)
+        {
+            DebugPrint("RLC", cpu);
+
+            throw new NotImplementedException("Unimplemented RLC");
+        }
+
+        internal static void Dad(Cpu cpu, int registerPair)
+        {
+            DebugPrint("DAD", cpu);
+
+            throw new NotImplementedException("Unimplemented DAD");
+        }
+
+        internal static void Ldax(Cpu cpu, int registers)
+        {
+            DebugPrint("LDAX", cpu);
+
+            throw new NotImplementedException("Unimplemented LDAX");
+        }
+
+
+        internal static void Dcx(Cpu cpu, int registerPair)
+        {
+            DebugPrint("DCX", cpu);
+
+            throw new NotImplementedException("Unimplemented DCX");
+        }
+
+
+        internal static void Rrc(Cpu cpu)
+        {
+            DebugPrint("RRC", cpu);
+
+            throw new NotImplementedException("Unimplemented RRC");
+        }
+
+        internal static void Ral(Cpu cpu)
+        {
+            DebugPrint("RAL", cpu);
+
+            throw new NotImplementedException("Unimplemented RAL");
+        }
+
+        internal static void Rar(Cpu cpu)
+        {
+            DebugPrint("RAR", cpu);
+
+            throw new NotImplementedException("Unimplemented RAR");
+        }
+
+
+        internal static void Shld(Cpu cpu)
+        {
+            DebugPrint("SHLD", cpu);
+
+            throw new NotImplementedException("Unimplemented SHLD");
+        }
+
+
+        internal static void Daa(Cpu cpu)
+        {
+            DebugPrint("DAA", cpu);
+
+            throw new NotImplementedException("Unimplemented DAA");
+        }
+
+
+        internal static void Lhld(Cpu cpu)
+        {
+            DebugPrint("LHLD", cpu);
+
+            throw new NotImplementedException("Unimplemented LHLD");
+        }
+
+        internal static void Cma(Cpu cpu)
+        {
+            DebugPrint("CMA", cpu);
+
+            throw new NotImplementedException("Unimplemented CMA");
         }
 
         internal static void Rnz(Cpu cpu)
@@ -54,7 +180,7 @@ namespace CPU
 
         }
 
-        internal static void Mov(Cpu cpu)
+        internal static void Mov(Cpu cpu, int src, int dst)
         {
             DebugPrint("MOV", cpu);
 
@@ -62,7 +188,7 @@ namespace CPU
 
         }
 
-        internal static void Add(Cpu cpu)
+        internal static void Add(Cpu cpu, int register)
         {
             DebugPrint("ADD", cpu);
 
@@ -70,7 +196,7 @@ namespace CPU
 
         }
 
-        internal static void Adc(Cpu cpu)
+        internal static void Adc(Cpu cpu, int register)
         {
             DebugPrint("ADC", cpu);
 
@@ -79,35 +205,35 @@ namespace CPU
         }
 
 
-        internal static void Sub(Cpu cpu)
+        internal static void Sub(Cpu cpu, int register)
         {
             DebugPrint("SUB", cpu);
 
             throw new NotImplementedException("Unimplemented SUB");
         }
 
-        internal static void Sbb(Cpu cpu)
+        internal static void Sbb(Cpu cpu, int register)
         {
             DebugPrint("SBB", cpu);
 
             throw new NotImplementedException("Unimplemented SBB");
         }
 
-        internal static void Ana(Cpu cpu)
+        internal static void Ana(Cpu cpu, int register)
         {
             DebugPrint("ANA", cpu);
 
             throw new NotImplementedException("Unimplemented ANA");
         }
 
-        internal static void Xra(Cpu cpu)
+        internal static void Xra(Cpu cpu, int register)
         {
             DebugPrint("XRA", cpu);
 
             throw new NotImplementedException("Unimplemented XRA");
         }
 
-        internal static void Ora(Cpu cpu)
+        internal static void Ora(Cpu cpu, int register)
         {
             DebugPrint("ORA", cpu);
 
@@ -115,96 +241,13 @@ namespace CPU
         }
 
 
-        internal static void Cmp(Cpu cpu)
+        internal static void Cmp(Cpu cpu, int register)
         {
             DebugPrint("CMP", cpu);
 
             throw new NotImplementedException("Unimplemented CMP");
         }
 
-        internal static void Lxi(Cpu cpu)
-        {
-            DebugPrint("LXI", cpu);
-
-            throw new NotImplementedException("Unimplemented LXI");
-        }
-
-        internal static void Inx(Cpu cpu)
-        {
-            DebugPrint("INX", cpu);
-
-            throw new NotImplementedException("Unimplemented INX");
-        }
-
-        internal static void Inr(Cpu cpu)
-        {
-            DebugPrint("INR", cpu);
-
-            throw new NotImplementedException("Unimplemented INR");
-        }
-
-        internal static void Dcr(Cpu cpu)
-        {
-            DebugPrint("DCR", cpu);
-
-            throw new NotImplementedException("Unimplemented DCR");
-        }
-
-        internal static void Mvi(Cpu cpu)
-        {
-            DebugPrint("MVI", cpu);
-
-            throw new NotImplementedException("Unimplemented MVI");
-        }
-
-        internal static void Rlc(Cpu cpu)
-        {
-            DebugPrint("RLC", cpu);
-
-            throw new NotImplementedException("Unimplemented RLC");
-        }
-
-        internal static void Rrc(Cpu cpu)
-        {
-            DebugPrint("RRC", cpu);
-
-            throw new NotImplementedException("Unimplemented RRC");
-        }
-
-        internal static void Ral(Cpu cpu)
-        {
-            DebugPrint("RAL", cpu);
-
-            throw new NotImplementedException("Unimplemented RAL");
-        }
-
-        internal static void Rar(Cpu cpu)
-        {
-            DebugPrint("RAR", cpu);
-
-            throw new NotImplementedException("Unimplemented RAR");
-        }
-
-        internal static void Dad(Cpu cpu)
-        {
-            DebugPrint("DAD", cpu);
-
-            throw new NotImplementedException("Unimplemented DAD");
-        }
-
-        internal static void Dcx(Cpu cpu)
-        {
-            DebugPrint("DCX", cpu);
-
-            throw new NotImplementedException("Unimplemented DCX");
-        }
-
-        internal static void Daa(Cpu cpu)
-        {
-            DebugPrint("DAA", cpu);
-
-            throw new NotImplementedException("Unimplemented DAA");
-        }
 
         internal static void Stc(Cpu cpu)
         {
@@ -340,7 +383,7 @@ namespace CPU
             throw new NotImplementedException("Unimplemented CMC");
         }
 
-        internal static void Pop(Cpu cpu)
+        internal static void Pop(Cpu cpu, int registerPair)
         {
             DebugPrint("POP", cpu);
 
@@ -368,19 +411,6 @@ namespace CPU
             throw new NotImplementedException("Unimplemented SPHL");
         }
 
-        internal static void Shld(Cpu cpu)
-        {
-            DebugPrint("SHLD", cpu);
-
-            throw new NotImplementedException("Unimplemented SHLD");
-        }
-
-        internal static void Lhld(Cpu cpu)
-        {
-            DebugPrint("LHLD", cpu);
-
-            throw new NotImplementedException("Unimplemented LHLD");
-        }
 
         internal static void Sta(Cpu cpu)
         {
@@ -522,35 +552,15 @@ namespace CPU
             throw new NotImplementedException("Unimplemented OUT");
         }
 
-        internal static void Stax(Cpu cpu)
-        {
-            DebugPrint("STAX", cpu);
 
-            throw new NotImplementedException("Unimplemented STAX");
-        }
-
-        internal static void Ldax(Cpu cpu)
-        {
-            DebugPrint("LDAX", cpu);
-
-            throw new NotImplementedException("Unimplemented LDAX");
-        }
-
-        internal static void Cma(Cpu cpu)
-        {
-            DebugPrint("CMA", cpu);
-
-            throw new NotImplementedException("Unimplemented CMA");
-        }
-
-        internal static void Push(Cpu cpu)
+        internal static void Push(Cpu cpu, int registerPair)
         {
             DebugPrint("PUSH", cpu);
 
             throw new NotImplementedException("Unimplemented PUSH");
         }
 
-        internal static void Rst(Cpu cpu)
+        internal static void Rst(Cpu cpu, int exp)
         {
             DebugPrint("RST", cpu);
 
