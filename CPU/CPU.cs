@@ -12,9 +12,7 @@ namespace CPU
         public const int D = 2;
         public const int E = 3;
         public const int H = 4;
-
         public const int L = 5;
-
         //MRef is not actually a register but logically belongs here
         public const int MRef = 6;
         public const int A = 7;
