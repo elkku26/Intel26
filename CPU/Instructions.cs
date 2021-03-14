@@ -191,16 +191,13 @@ namespace CPU
         {
             DebugPrint("ADD", cpu);
 
-            if (register != 6)
-            {
+            if (register != Registers.MRef)
                 cpu.InternalRegisters[Registers.A] += cpu.InternalRegisters[register];
-            }
             else
-            {
                 cpu.InternalRegisters[Registers.A] += cpu.Memory[cpu.InternalRegisters[Registers.MRef]];
-            }
-            
-            
+
+            //TODO: Still haven't implemented any flags or tested this...
+
         }
 
         internal static void Adc(Cpu cpu, int register)
