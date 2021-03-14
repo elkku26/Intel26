@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+
 namespace CPU
 {
-    
+
     internal readonly struct Registers
     {
         public const int B = 0;
@@ -12,14 +13,18 @@ namespace CPU
         public const int E = 3;
         public const int H = 4;
         public const int L = 5;
+        //MRef is not actually a register but logically belongs here
+        public const int MRef = 6;
         public const int A = 7;
     }
-    
+
+
     internal readonly struct RegisterPairs
     {
         public const int B = 0;
         public const int D = 1;
         public const int H = 2;
+        public const int SP = 3;
     }
 
 
@@ -47,9 +52,10 @@ namespace CPU
         private readonly string _binName;
         private readonly string _runDirectory;
         private byte _opCodeByte;
+        public byte[] InternalRegisters;
         public byte[] Memory;
         public int Pc;
-        public byte[] CpuRegister;
+        public short Sp;
         /// <summary>
         ///     Constructor for the CPU Class
         /// </summary>
@@ -73,6 +79,7 @@ namespace CPU
             var programData = File.ReadAllBytes(path);
             Array.Copy(programData, 0, Memory, 0, programData.Length);
             Debug.WriteLine("Load succesful");
+
             return Memory;
         }
 
@@ -81,15 +88,15 @@ namespace CPU
         /// </summary>
         public void InitSystem()
         {
-            
+
             Memory = LoadData(_runDirectory + _binName);
 
-            CpuRegister = new byte[7];
-            
+            InternalRegisters = new byte[7];
+
             Debug.WriteLine("Init successful");
 
             //temporary code for testing, not a part of the final program flow
-            while (true) {Step();}
+            while (true) Step();
         }
 
         private void Step()
@@ -468,9 +475,8 @@ namespace CPU
 
                         // 0x31
                         case 0x1:
-                            
-                            //TODO: Register passed as 0 temporarily even though it should be SP, check this later
-                            Instructions.Lxi(this, 0);
+
+                            Instructions.Lxi(this, RegisterPairs.SP);
 
                             break;
 
@@ -484,38 +490,28 @@ namespace CPU
                         // 0x33
                         case 0x3:
 
-                            //TODO: Register pair passed as 0 temporarily even though it should be SP, check this later
-                            Instructions.Inx(this, 0);
+                            Instructions.Inx(this, RegisterPairs.SP);
 
                             break;
 
                         // 0x34
                         case 0x4:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Inr(this, 0);
+                            Instructions.Inr(this, Registers.MRef);
 
                             break;
 
                         // 0x35
                         case 0x5:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Dcr(this, 0);
+                            Instructions.Dcr(this, Registers.MRef);
 
                             break;
 
                         // 0x36
                         case 0x6:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mvi(this, 0);
+                            Instructions.Mvi(this, Registers.MRef);
 
                             break;
 
@@ -536,9 +532,7 @@ namespace CPU
                         // 0x39
                         case 0x9:
 
-                            //TODO: register should be SP but I haven't figured out what that is yet
-
-                            Instructions.Dad(this, 0);
+                            Instructions.Dad(this, RegisterPairs.SP);
 
                             break;
 
@@ -552,9 +546,7 @@ namespace CPU
                         // 0x3B
                         case 0xB:
 
-                            //TODO: registerPair should be SP but I haven't figured out what that is yet
-
-                            Instructions.Dcx(this, 0);
+                            Instructions.Dcx(this, RegisterPairs.SP);
 
                             break;
 
@@ -636,9 +628,8 @@ namespace CPU
 
                         // 0x46
                         case 0x6:
-                            
-                            //TODO: dst should be M but I haven't figured out what that is yet
-                            Instructions.Mov(this, Registers.B, 0);
+
+                            Instructions.Mov(this, Registers.B, Registers.MRef);
 
                             break;
 
@@ -693,10 +684,8 @@ namespace CPU
 
                         // 0x4E
                         case 0xE:
-                            //TODO: dst should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, Registers.C, 0);
+                            Instructions.Mov(this, Registers.C, Registers.MRef);
 
                             break;
 
@@ -758,9 +747,7 @@ namespace CPU
                         // 0x56
                         case 0x6:
 
-                            //TODO: dst should be M but I haven't figured out what that is yet
-
-                            Instructions.Mov(this, Registers.D, 0);
+                            Instructions.Mov(this, Registers.D, Registers.MRef);
 
                             break;
 
@@ -816,9 +803,7 @@ namespace CPU
                         // 0x5E
                         case 0xE:
 
-                            //TODO: dst should be M but I haven't figured out what that is yet
-
-                            Instructions.Mov(this, Registers.E, 0);
+                            Instructions.Mov(this, Registers.E, Registers.MRef);
 
                             break;
 
@@ -879,11 +864,8 @@ namespace CPU
 
                         // 0x66
                         case 0x6:
-                            
-                            //TODO: dst should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, Registers.H, 0);
+                            Instructions.Mov(this, Registers.H, Registers.MRef);
 
                             break;
 
@@ -938,11 +920,8 @@ namespace CPU
 
                         // 0x6E
                         case 0xE:
-                            
-                            //TODO: dst should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, Registers.L, 0);
+                            Instructions.Mov(this, Registers.L, Registers.MRef);
 
                             break;
 
@@ -961,58 +940,43 @@ namespace CPU
                     {
                         // 0x70
                         case 0x0:
-                            
-                            //TODO: src should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, 0, Registers.B);
+                            Instructions.Mov(this, Registers.MRef, Registers.B);
 
                             break;
 
                         // 0x71
                         case 0x1:
 
-                            //TODO: src should be M but I haven't figured out what that is yet
-
-                            Instructions.Mov(this, 0, Registers.C);
+                            Instructions.Mov(this, Registers.MRef, Registers.C);
 
                             break;
 
                         // 0x72
                         case 0x2:
-                            //TODO: src should be M but I haven't figured out what that is yet
 
-                            Instructions.Mov(this, 0, Registers.D);
+                            Instructions.Mov(this, Registers.MRef, Registers.D);
 
                             break;
 
                         // 0x73
                         case 0x3:
-                            
-                            //TODO: src should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, 0, Registers.E);
+                            Instructions.Mov(this, Registers.MRef, Registers.E);
 
                             break;
 
                         // 0x74
                         case 0x4:
 
-                            
-                            //TODO: src should be M but I haven't figured out what that is yet
-
-                            Instructions.Mov(this, 0, Registers.H);
+                            Instructions.Mov(this, Registers.MRef, Registers.H);
 
                             break;
 
                         // 0x75
                         case 0x5:
-                            
-                            //TODO: src should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, 0, Registers.L);
+                            Instructions.Mov(this, Registers.MRef, Registers.L);
 
                             break;
 
@@ -1025,11 +989,8 @@ namespace CPU
 
                         // 0x77
                         case 0x7:
-                            
-                            //TODO: src should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, 0, Registers.A);
+                            Instructions.Mov(this, Registers.MRef, Registers.A);
 
                             break;
 
@@ -1077,11 +1038,8 @@ namespace CPU
 
                         // 0x7E
                         case 0xE:
-                            
-                            //TODO: dst should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Mov(this, Registers.A, 0);
+                            Instructions.Mov(this, Registers.A, Registers.MRef);
 
                             break;
 
@@ -1142,11 +1100,8 @@ namespace CPU
 
                         // 0x86
                         case 0x6:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Add(this, 0);
+                            Instructions.Add(this, Registers.MRef);
 
                             break;
 
@@ -1202,10 +1157,7 @@ namespace CPU
                         // 0x8E
                         case 0xE:
 
-                            //TODO: register should be M but I haven't figured out what that is yet
-
-                            
-                            Instructions.Adc(this, 0);
+                            Instructions.Adc(this, Registers.MRef);
 
                             break;
 
@@ -1266,9 +1218,8 @@ namespace CPU
 
                         // 0x96
                         case 0x6:
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            Instructions.Sub(this, 0);
+                            Instructions.Sub(this, Registers.MRef);
 
                             break;
 
@@ -1324,10 +1275,7 @@ namespace CPU
                         // 0x9E
                         case 0xE:
 
-                            //TODO: register should be M but I haven't figured out what that is yet
-
-                            
-                            Instructions.Sbb(this, 0);
+                            Instructions.Sbb(this, Registers.MRef);
 
                             break;
 
@@ -1388,11 +1336,8 @@ namespace CPU
 
                         // 0xA6
                         case 0x6:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Ana(this, 0);
+                            Instructions.Ana(this, Registers.MRef);
 
                             break;
 
@@ -1447,11 +1392,8 @@ namespace CPU
 
                         // 0xAE
                         case 0xE:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Xra(this, 0);
+                            Instructions.Xra(this, Registers.MRef);
 
                             break;
 
@@ -1512,10 +1454,8 @@ namespace CPU
 
                         // 0xB6
                         case 0x6:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-                            Instructions.Ora(this, 0);
+                            Instructions.Ora(this, Registers.MRef);
 
                             break;
 
@@ -1570,11 +1510,8 @@ namespace CPU
 
                         // 0xBE
                         case 0xE:
-                            
-                            //TODO: register should be M but I haven't figured out what that is yet
 
-
-                            Instructions.Cmp(this, 0);
+                            Instructions.Cmp(this, Registers.MRef);
 
                             break;
 
@@ -1985,7 +1922,6 @@ namespace CPU
                         case 0x5:
 
                             //TODO: registerPair should be PSW but I haven't figured out what that is yet
-
                             Instructions.Push(this, 0);
 
                             break;

@@ -5,7 +5,6 @@ namespace CPU
 {
 
 
-
     /// <summary>
     ///     Holds all of the possible instructions
     /// </summary>
@@ -192,8 +191,16 @@ namespace CPU
         {
             DebugPrint("ADD", cpu);
 
-            throw new NotImplementedException("Unimplemented ADD");
-
+            if (register != 6)
+            {
+                cpu.InternalRegisters[Registers.A] += cpu.InternalRegisters[register];
+            }
+            else
+            {
+                cpu.InternalRegisters[Registers.A] += cpu.Memory[cpu.InternalRegisters[Registers.MRef]];
+            }
+            
+            
         }
 
         internal static void Adc(Cpu cpu, int register)
