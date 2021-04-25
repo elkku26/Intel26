@@ -1,5 +1,4 @@
 
-todo-list.txt
 
 # Created by .ignore support plugin (hsz.mobi)
 ### JetBrains template
@@ -10,6 +9,9 @@ todo-list.txt
 
 CPU/bin
 CPU/obj
+todo-list.txt
+CPUTests/bin
+CPUTests/obj
 
 # User-specific stuff
 .idea/**/indexLayout.xml

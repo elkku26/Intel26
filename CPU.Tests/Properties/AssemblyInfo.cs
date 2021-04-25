@@ -1,19 +1,14 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-
-// This is needed so that the tests can access the main CPU assembly
-[assembly: InternalsVisibleTo("CPU.Tests")]
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CPU")]
+[assembly: AssemblyTitle("CPU.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CPU")]
+[assembly: AssemblyProduct("CPU.Tests")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -24,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("69DB21FD-3DF6-4B79-A396-FD36120E62EA")]
+[assembly: Guid("409DF8AC-F78C-4E60-8F4C-54BC7BB3135B")]
 
 // Version information for an assembly consists of the following four values:
 //

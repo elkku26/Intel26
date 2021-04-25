@@ -4,11 +4,12 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{69DB21FD-3DF6-4B79-A396-FD36120E62EA}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <ProjectGuid>{409DF8AC-F78C-4E60-8F4C-54BC7BB3135B}</ProjectGuid>
+        <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+        <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>CPU</RootNamespace>
-        <AssemblyName>CPU</AssemblyName>
+        <RootNamespace>CPU.Tests</RootNamespace>
+        <AssemblyName>CPU.Tests</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
@@ -36,16 +37,19 @@
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
         <Reference Include="System.Xml" />
+        <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
+            <HintPath>..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="BitHelper.cs" />
-        <Compile Include="CPU.cs" />
-        <Compile Include="DebugHelper.cs" />
-        <Compile Include="Instructions.cs" />
+        <Compile Include="Tests.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include=".gitignore" />
+      <ProjectReference Include="..\CPU\CPU.csproj">
+        <Project>{69db21fd-3df6-4b79-a396-fd36120e62ea}</Project>
+        <Name>CPU</Name>
+      </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

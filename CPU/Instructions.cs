@@ -191,12 +191,75 @@ namespace CPU
         {
             DebugPrint("ADD", cpu);
 
-            if (register != Registers.MRef)
-                cpu.InternalRegisters[Registers.A] += cpu.InternalRegisters[register];
+            int workingInt;
+            
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                workingInt = cpu.Registers[register];
             else
-                cpu.InternalRegisters[Registers.A] += cpu.Memory[cpu.InternalRegisters[Registers.MRef]];
+                //Set the working int as the memory reference
+                workingInt = cpu.Memory[cpu.Registers[Register.MRef]];
 
-            //TODO: Still haven't implemented any flags or tested this...
+            var accumulatedSum = workingInt + cpu.Registers[Register.A];
+            
+
+            //Check if carry bit should be set
+            if (accumulatedSum > 255)
+                //Switch carry bit to 1
+                cpu.Flags |= FlagSelector.Carry;
+            else
+                //Switch carry bit to 0
+                cpu.Flags &= ~FlagSelector.Carry & 0xFF;
+
+            
+            //Check if sign bit should be set
+            if ((accumulatedSum & FlagSelector.Sign) == FlagSelector.Sign)
+            {
+                //Set the sign bit to 1
+                cpu.Flags |= FlagSelector.Sign;
+            }
+            else
+            {
+                //Set the sign bit to 0
+                cpu.Flags &= ~FlagSelector.Sign & 0xFF;
+            } 
+            
+            
+            //Check if zero bit should be set
+            if ( ( accumulatedSum & 0xFF ) == 0 )
+            {
+                //Set the zero bit to 1
+                cpu.Flags |= FlagSelector.Zero;
+            }
+            else
+            {
+                //Set the zero bit to 0
+                cpu.Flags &= ~FlagSelector.Zero & 0xFF;
+            }
+
+            //Check if parity bit should be set
+            if (BitHelper.ParityCounter(accumulatedSum) == 1)
+            {
+                //Set the parity bit to 1
+                cpu.Flags |= FlagSelector.Parity;
+            }
+            else
+            {
+                //Set the parity bit to 0
+                cpu.Flags &= ~FlagSelector.Parity & 0xFF;
+            }
+
+
+            //Set the appropriate register/memory reference to the working byte
+            if (register != Register.MRef)
+                //Set the register in question as the working byte 
+                cpu.Registers[register] = (byte) workingInt;
+            else
+                //Set the memory reference as the working byte
+                cpu.Memory[cpu.Registers[Register.MRef]] = (byte) workingInt;
+
+
+            //TODO: Implement rest of the flags and test
 
         }
 

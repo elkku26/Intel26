@@ -1,0 +1,11 @@
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/CPU.Tests.dll
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/CPU.Tests.pdb
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/CPU.exe
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/nunit.framework.dll
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/CPU.pdb
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/bin/Debug/nunit.framework.xml
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/obj/Debug/CPU.Tests.csprojAssemblyReference.cache
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/obj/Debug/CPU.Tests.csproj.CoreCompileInputs.cache
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/obj/Debug/CPU.Tests.csproj.CopyComplete
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/obj/Debug/CPU.Tests.dll
+/home/eliasm/Documents/Projects/Intel26/CPU.Tests/obj/Debug/CPU.Tests.pdb
