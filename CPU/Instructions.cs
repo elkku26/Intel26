@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Win32;
 using static CPU.DebugPrinter;
 
 namespace CPU
@@ -193,7 +192,7 @@ namespace CPU
             DebugPrint("ADD", cpu);
 
             int addToAccumulator;
-            var oldAccumulatorTotal = cpu.Registers[Register.A];
+            int oldAccumulatorTotal = cpu.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
@@ -205,7 +204,6 @@ namespace CPU
             var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
 
 
-            
             //Check if carry bit should be set
             if (newAccumulatorTotal > 255)
                 //Switch carry bit to 1
@@ -222,8 +220,8 @@ namespace CPU
             else
                 //Set the sign bit to 0
                 cpu.Flags &= ~FlagSelector.Sign & 0xFF;
-            
-            
+
+
             //Check if zero bit should be set
             if ((newAccumulatorTotal & 0xFF) == 0)
                 //Set the zero bit to 1
@@ -232,7 +230,7 @@ namespace CPU
                 //Set the zero bit to 0
                 cpu.Flags &= ~FlagSelector.Zero & 0xFF;
 
-            
+
             //Check if parity bit should be set
             if (BitHelper.ParityCounter(newAccumulatorTotal) == 1)
                 //Set the parity bit to 1
@@ -240,30 +238,19 @@ namespace CPU
             else
                 //Set the parity bit to 0
                 cpu.Flags &= ~FlagSelector.Parity & 0xFF;
-            
-            
+
+
             //Check if Aux Carry bit should be set
-            if ((addToAccumulator & 0xF + addToAccumulator & 0xF) > 15)
-            {
+            if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
                 //Set the aux carry flag to 1
-                cpu.Flags |= FlagSelector.AuxCarry;
-            }
+                BitHelper.SetFlag(1, FlagSelector.AuxCarry, cpu);
             else
-            {
                 //Set the aux carry flag to 0
-                cpu.Flags &= ~FlagSelector.AuxCarry & 0xFF;
-            }
-            
-            
-            
-            //Set the appropriate register/memory reference to the working byte
-            if (register != Register.MRef)
-                //Set the register in question as the working int and
-                //reduce it to one byte to 'force' an overflow
-                cpu.Registers[register] = (byte) (addToAccumulator & 0xFF);
-            else
-                //Set the memory reference as the working int and reduce it to one byte
-                cpu.Memory[cpu.Registers[Register.MRef]] = (byte) (addToAccumulator & 0xFF);
+                BitHelper.SetFlag(0, FlagSelector.AuxCarry, cpu);
+
+
+            //Set the accumulator to its new value and cast it to one byte to 'force' an overflow
+            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
 
             //TODO: Implement rest of the flags and test

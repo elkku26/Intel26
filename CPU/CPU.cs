@@ -34,11 +34,11 @@ namespace CPU
     /// </summary>
     internal readonly struct FlagSelector
     {
-        public const int Carry    = 0b1;
-        public const int Parity   = 0b100;
+        public const int Carry = 0b1;
+        public const int Parity = 0b100;
         public const int AuxCarry = 0b10000;
-        public const int Zero     = 0b1000000;
-        public const int Sign     = 0b10000000;
+        public const int Zero = 0b1000000;
+        public const int Sign = 0b10000000;
     }
 
 

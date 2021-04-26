@@ -10,8 +10,12 @@
 CPU/bin
 CPU/obj
 todo-list.txt
-CPUTests/bin
-CPUTests/obj
+CPU.Tests/bin
+CPU.Tests/obj
+CPU.Tests/Properties
+CPU.Tests/packages.config
+Intel26.sln.DotSettings.user
+packages
 
 # User-specific stuff
 .idea/**/indexLayout.xml
