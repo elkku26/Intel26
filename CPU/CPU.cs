@@ -23,9 +23,9 @@ namespace CPU
 
     internal readonly struct RegisterPair
     {
-        public const int B  = 0;
-        public const int D  = 1;
-        public const int H  = 2;
+        public const int B = 0;
+        public const int D = 1;
+        public const int H = 2;
         public const int SP = 3;
     }
 

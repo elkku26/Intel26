@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Win32;
 using static CPU.DebugPrinter;
 
 namespace CPU
@@ -191,72 +192,78 @@ namespace CPU
         {
             DebugPrint("ADD", cpu);
 
-            int workingInt;
-            
+            int addToAccumulator;
+            var oldAccumulatorTotal = cpu.Registers[Register.A];
+
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                workingInt = cpu.Registers[register];
+                addToAccumulator = cpu.Registers[register];
             else
                 //Set the working int as the memory reference
-                workingInt = cpu.Memory[cpu.Registers[Register.MRef]];
+                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
-            var accumulatedSum = workingInt + cpu.Registers[Register.A];
+            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
+
+
             
-
             //Check if carry bit should be set
-            if (accumulatedSum > 255)
+            if (newAccumulatorTotal > 255)
                 //Switch carry bit to 1
                 cpu.Flags |= FlagSelector.Carry;
             else
                 //Switch carry bit to 0
                 cpu.Flags &= ~FlagSelector.Carry & 0xFF;
 
-            
+
             //Check if sign bit should be set
-            if ((accumulatedSum & FlagSelector.Sign) == FlagSelector.Sign)
-            {
+            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
                 //Set the sign bit to 1
                 cpu.Flags |= FlagSelector.Sign;
-            }
             else
-            {
                 //Set the sign bit to 0
                 cpu.Flags &= ~FlagSelector.Sign & 0xFF;
-            } 
             
             
             //Check if zero bit should be set
-            if ( ( accumulatedSum & 0xFF ) == 0 )
-            {
+            if ((newAccumulatorTotal & 0xFF) == 0)
                 //Set the zero bit to 1
                 cpu.Flags |= FlagSelector.Zero;
-            }
             else
-            {
                 //Set the zero bit to 0
                 cpu.Flags &= ~FlagSelector.Zero & 0xFF;
-            }
 
+            
             //Check if parity bit should be set
-            if (BitHelper.ParityCounter(accumulatedSum) == 1)
-            {
+            if (BitHelper.ParityCounter(newAccumulatorTotal) == 1)
                 //Set the parity bit to 1
                 cpu.Flags |= FlagSelector.Parity;
+            else
+                //Set the parity bit to 0
+                cpu.Flags &= ~FlagSelector.Parity & 0xFF;
+            
+            
+            //Check if Aux Carry bit should be set
+            if ((addToAccumulator & 0xF + addToAccumulator & 0xF) > 15)
+            {
+                //Set the aux carry flag to 1
+                cpu.Flags |= FlagSelector.AuxCarry;
             }
             else
             {
-                //Set the parity bit to 0
-                cpu.Flags &= ~FlagSelector.Parity & 0xFF;
+                //Set the aux carry flag to 0
+                cpu.Flags &= ~FlagSelector.AuxCarry & 0xFF;
             }
-
-
+            
+            
+            
             //Set the appropriate register/memory reference to the working byte
             if (register != Register.MRef)
-                //Set the register in question as the working byte 
-                cpu.Registers[register] = (byte) workingInt;
+                //Set the register in question as the working int and
+                //reduce it to one byte to 'force' an overflow
+                cpu.Registers[register] = (byte) (addToAccumulator & 0xFF);
             else
-                //Set the memory reference as the working byte
-                cpu.Memory[cpu.Registers[Register.MRef]] = (byte) workingInt;
+                //Set the memory reference as the working int and reduce it to one byte
+                cpu.Memory[cpu.Registers[Register.MRef]] = (byte) (addToAccumulator & 0xFF);
 
 
             //TODO: Implement rest of the flags and test
