@@ -1,5 +1,8 @@
 using System;
-using static CPU.DebugPrinter;
+using static CPU.BinaryHelper;
+using static CPU.DebugHelper;
+
+// ReSharper disable ConvertIfStatementToConditionalTernaryExpression
 
 namespace CPU
 {
@@ -183,7 +186,7 @@ namespace CPU
         {
             DebugPrint("MOV", cpu);
 
-            throw new NotImplementedException("Unimplemented MOV");
+            cpu.Registers[dst] = cpu.Registers[src];
 
         }
 
@@ -204,56 +207,53 @@ namespace CPU
             var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
 
 
-            //Check if carry bit should be set
+            //Check if Carry bit should be set
             if (newAccumulatorTotal > 255)
                 //Switch carry bit to 1
-                cpu.Flags |= FlagSelector.Carry;
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
             else
                 //Switch carry bit to 0
-                cpu.Flags &= ~FlagSelector.Carry & 0xFF;
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
 
 
-            //Check if sign bit should be set
+            //Check if Sign bit should be set
             if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
                 //Set the sign bit to 1
-                cpu.Flags |= FlagSelector.Sign;
+                cpu.SetFlags(1, FlagSelector.Sign, cpu);
             else
                 //Set the sign bit to 0
-                cpu.Flags &= ~FlagSelector.Sign & 0xFF;
+                cpu.SetFlags(0, FlagSelector.Sign, cpu);
 
 
-            //Check if zero bit should be set
+            //Check if Zero bit should be set
             if ((newAccumulatorTotal & 0xFF) == 0)
                 //Set the zero bit to 1
-                cpu.Flags |= FlagSelector.Zero;
+                cpu.SetFlags(1, FlagSelector.Zero, cpu);
             else
                 //Set the zero bit to 0
-                cpu.Flags &= ~FlagSelector.Zero & 0xFF;
+                cpu.SetFlags(0, FlagSelector.Zero, cpu);
 
 
-            //Check if parity bit should be set
-            if (BitHelper.ParityCounter(newAccumulatorTotal) == 1)
+            //Check if Parity bit should be set
+            if (ParityCounter(newAccumulatorTotal) == 1)
                 //Set the parity bit to 1
-                cpu.Flags |= FlagSelector.Parity;
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
             else
                 //Set the parity bit to 0
-                cpu.Flags &= ~FlagSelector.Parity & 0xFF;
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
 
 
             //Check if Aux Carry bit should be set
             if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
                 //Set the aux carry flag to 1
-                BitHelper.SetFlag(1, FlagSelector.AuxCarry, cpu);
+                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
             else
                 //Set the aux carry flag to 0
-                BitHelper.SetFlag(0, FlagSelector.AuxCarry, cpu);
+                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
 
 
             //Set the accumulator to its new value and cast it to one byte to 'force' an overflow
             cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
-
-
-            //TODO: Implement rest of the flags and test
 
         }
 
@@ -261,7 +261,67 @@ namespace CPU
         {
             DebugPrint("ADC", cpu);
 
-            throw new NotImplementedException("Unimplemented ADC");
+
+            int addToAccumulator;
+            int oldAccumulatorTotal = cpu.Registers[Register.A];
+
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                addToAccumulator = cpu.Registers[register];
+            else
+                //Set the working int as the memory reference
+                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
+
+            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal + (cpu.Flags & FlagSelector.Carry);
+
+
+            //Check if Carry bit should be set
+            if (newAccumulatorTotal > 255)
+                //Switch carry bit to 1
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
+            else
+                //Switch carry bit to 0
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+
+
+            //Check if Sign bit should be set
+            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
+                //Set the sign bit to 1
+                cpu.SetFlags(1, FlagSelector.Sign, cpu);
+            else
+                //Set the sign bit to 0
+                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+
+
+            //Check if Zero bit should be set
+            if ((newAccumulatorTotal & 0xFF) == 0)
+                //Set the zero bit to 1
+                cpu.SetFlags(1, FlagSelector.Zero, cpu);
+            else
+                //Set the zero bit to 0
+                cpu.SetFlags(0, FlagSelector.Zero, cpu);
+
+
+            //Check if Parity bit should be set
+            if (ParityCounter(newAccumulatorTotal) == 1)
+                //Set the parity bit to 1
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            else
+                //Set the parity bit to 0
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+
+
+            //Check if Aux Carry bit should be set
+            if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
+                //Set the aux carry flag to 1
+                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+            else
+                //Set the aux carry flag to 0
+                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+
+
+            //Set the accumulator to its new value and cast it to one byte to 'force' an overflow
+            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
         }
 

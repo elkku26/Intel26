@@ -38,7 +38,7 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="BitHelper.cs" />
+        <Compile Include="BinaryHelper.cs" />
         <Compile Include="CPU.cs" />
         <Compile Include="DebugHelper.cs" />
         <Compile Include="Instructions.cs" />

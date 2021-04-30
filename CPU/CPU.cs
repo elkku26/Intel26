@@ -1,10 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using static CPU.DebugHelper;
 
 namespace CPU
 {
 
+    public enum Error
+    {
+        FileNotFound = 1,
+        InvalidPathArgument = 2,
+        OutOfMemory = 3
+    }
     internal readonly struct Register
     {
         public const int B = 0;
@@ -45,7 +52,7 @@ namespace CPU
     /// <summary>
     ///     Prepares the CPU for initialization by reading config files etc.
     /// </summary>
-    internal static class PrepSystem
+    internal static class PrepareCpu
     {
         /// <summary>
         ///     Entry point
@@ -53,8 +60,20 @@ namespace CPU
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            var cpu = new Cpu("/home/eliasm/Documents/Projects/Intel26/Test Programs/", "OPCODEDEBUG.COM");
-            cpu.InitSystem();
+            if (args.Length == 0)
+            {
+                Die(Error.InvalidPathArgument);
+            }
+
+            var fullPath = args[0];
+
+            if (!File.Exists(fullPath))
+            {
+                Die(Error.FileNotFound, "Please enter a file as the first argument.");
+            }
+
+            var cpu = new Cpu(fullPath);
+            cpu.StartCpu();
         }
     }
 
@@ -63,8 +82,7 @@ namespace CPU
     /// </summary>
     internal class Cpu
     {
-        private readonly string _binName;
-        private readonly string _runDirectory;
+        private readonly string _fullPath;
         private byte _opCodeByte;
         public byte Flags;
         public byte[] Memory;
@@ -74,12 +92,15 @@ namespace CPU
         /// <summary>
         ///     Constructor for the CPU Class
         /// </summary>
-        /// <param name="runDirectory">The directory from which the binary is run. Should end in a slash or InitSystem() may fail.</param>
-        /// <param name="binName">The name of the binary that is to be run.</param>
-        public Cpu(string runDirectory, string binName)
+        /// <param name="fullPath">The full path to the binary. </param>
+        public Cpu(string fullPath = "")
         {
-            _runDirectory = runDirectory;
-            _binName = binName;
+            _fullPath = fullPath;
+            Flags = new byte();
+            Memory = new byte[64000];
+            Registers = new byte[8];
+            Pc = 0;
+            Sp = 0;
         }
 
         /// <summary>
@@ -90,7 +111,6 @@ namespace CPU
         private byte[] LoadData(string path)
         {
             Debug.WriteLine("Loading data");
-            Memory = new byte[64000];
             var programData = File.ReadAllBytes(path);
             Array.Copy(programData, 0, Memory, 0, programData.Length);
             Debug.WriteLine("Load succesful");
@@ -101,23 +121,29 @@ namespace CPU
         /// <summary>
         ///     Initializes the CPU by loading data into memory, setting registers, and beginning execution
         /// </summary>
-        public void InitSystem()
+        public void StartCpu()
         {
 
-            Memory = LoadData(_runDirectory + _binName);
+            Memory = LoadData(_fullPath);
 
-            //Register[6] will never be used, but adding that empty byte makes a lot of things easier
-            Registers = new byte[8];
+            Debug.WriteLine("Start successful");
 
-            Debug.WriteLine("Init successful");
-
-            //temporary code for testing, not a part of the final program flow
             while (true) Step();
+        }
+
+
+        public void SetFlags(int status, int selector, Cpu cpu)
+        {
+            cpu.Flags = (byte) (status == 1 ? cpu.Flags | selector : cpu.Flags & ~selector & 0xFF);
         }
 
         private void Step()
         {
 
+            if (Pc == Memory.Length)
+            {
+                Die(Error.OutOfMemory);
+            }
             _opCodeByte = Memory[Pc];
 
             //Debug.WriteLine("Current opcode: Hex 0x{0:X}, Bin {1}", _opCodeByte, Convert.ToString(_opCodeByte, 2).PadLeft(8, '0'));

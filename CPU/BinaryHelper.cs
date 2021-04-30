@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace CPU
 {
-    internal static class BitHelper
+    /// <summary>
+    /// A helper class for dealing with bit/byte-related tasks
+    /// </summary>
+    internal static class BinaryHelper
     {
 
         private static readonly Dictionary<char, byte> FlagAbbr
@@ -31,10 +34,6 @@ namespace CPU
             return (parityCount + 1) % 2;
         }
 
-        internal static void SetFlag(int status, int selector, Cpu cpu)
-        {
-            cpu.Flags = (byte) (status == 1 ? cpu.Flags | selector : cpu.Flags & ~selector & 0xFF);
-        }
 
         internal static byte FlagConstructor(string flagString)
         {
@@ -42,14 +41,14 @@ namespace CPU
 
             foreach (char flag in flagString)
             {
-                var sanitisedFlag = Char.ToUpper(flag);
-                if (!FlagAbbr.ContainsKey(sanitisedFlag))
+                var upperCaseFlag = Char.ToUpper(flag);
+                if (!FlagAbbr.ContainsKey(upperCaseFlag))
                 {
                     throw new ArgumentOutOfRangeException(nameof(flagString), flagString,
                         $"Every char in {nameof(flagString)} must be a valid flag identifier present in FlagAbbr.");
                 }
 
-                constructedFlagSelector |= FlagAbbr[sanitisedFlag];
+                constructedFlagSelector |= FlagAbbr[upperCaseFlag];
             }
 
             return constructedFlagSelector;
