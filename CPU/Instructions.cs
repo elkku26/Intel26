@@ -204,7 +204,8 @@ namespace CPU
                 //Set the working int as the memory reference
                 addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
-            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
+            //Make sure the new accumulator total isn't any more than 255 (1 byte)
+            var newAccumulatorTotal = (addToAccumulator + oldAccumulatorTotal);
 
 
             //Check if Carry bit should be set
@@ -235,7 +236,7 @@ namespace CPU
 
 
             //Check if Parity bit should be set
-            if (ParityCounter(newAccumulatorTotal) == 1)
+            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
                 //Set the parity bit to 1
                 cpu.SetFlags(1, FlagSelector.Parity, cpu);
             else
@@ -244,7 +245,7 @@ namespace CPU
 
 
             //Check if Aux Carry bit should be set
-            if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
+            if ((oldAccumulatorTotal & 0xF) + (addToAccumulator & 0xF) > 15)
                 //Set the aux carry flag to 1
                 cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
             else
@@ -252,7 +253,7 @@ namespace CPU
                 cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
 
 
-            //Set the accumulator to its new value and cast it to one byte to 'force' an overflow
+            //Set the accumulator to its new value
             cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
         }
