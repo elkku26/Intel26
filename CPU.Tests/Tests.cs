@@ -10,7 +10,7 @@ namespace CPU.Tests
     public class InstructionTests
     {
         [Test]
-        public void InstructionADD_ToRegister_AllFlagsLow_ParitySignHigh()
+        public void InstructionADDRegister_AllFlagsLow_ParitySignHigh()
         {
             var cpu = new Cpu();
             cpu.Registers[Register.B] = 130;
@@ -24,7 +24,7 @@ namespace CPU.Tests
         }
 
         [Test]
-        public void InstructionADD_ToMemRef_AllFlagsLow_NoChange()
+        public void InstructionADDMemRef_AllFlagsLow_NoChange()
         {
             var cpu = new Cpu();
 
@@ -43,7 +43,7 @@ namespace CPU.Tests
 
 
         [Test]
-        public void InstructionADC_ToRegister_CarryHigh_ParitySignHigh()
+        public void InstructionADCToRegister_CarryHigh_ParitySignHigh()
         {
             var cpu = new Cpu();
             cpu.Registers[Register.B] = 131;
@@ -58,7 +58,7 @@ namespace CPU.Tests
         }
 
         [Test]
-        public void InstructionMOV_FromBToC_FlagsUnaltered()
+        public void InstructionMOVFromBToC_AllFlagsLow_NoChange()
         {
             var cpu = new Cpu();
             cpu.Registers[Register.B] = 6;
@@ -66,6 +66,7 @@ namespace CPU.Tests
 
             Assert.That(cpu.Registers[Register.C], Is.EqualTo(6));
             Assert.That(cpu.Registers[Register.B], Is.EqualTo(6));
+            Assert.That(cpu.Flags, Is.Zero);
         }
     }
 
@@ -73,6 +74,7 @@ namespace CPU.Tests
     public class HelperTests
     {
 
+        
         [Test]
         public void BinaryHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
