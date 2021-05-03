@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.Framework.Constraints;
 using static CPU.BinaryHelper;
 
 namespace CPU.Tests
@@ -24,7 +25,41 @@ namespace CPU.Tests
         }
 
         [Test]
-        public void InstructionADDMemRef_AllFlagsLow_NoChange()
+        public void InstructionADDRegister_AllFlagsLow_ZeroCarryParityAuxHigh()
+        {
+            var cpu = new Cpu();
+            cpu.Registers[Register.A] = 255;
+            cpu.Registers[Register.B] = 1;
+            
+            Instructions.Add(cpu, Register.B);
+            
+            //Check that the value in the accumulator is correct
+            // (255 + 1) & 0xFF = 0
+            Assert.That(cpu.Registers[Register.A], Is.EqualTo(0));
+
+            //Check that Zero and Carry flags are high
+            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("ZCPA")));
+        }
+
+        [Test]
+        public void InstructionADDRegister_AllFlagsLow_AuxSignHigh()
+        {
+            var cpu = new Cpu();
+            cpu.Registers[Register.A] = 46;
+            cpu.Registers[Register.B] = 116;
+            
+            Instructions.Add(cpu, Register.B);
+            
+            //Check that the value in the accumulator is correct
+            Assert.That(cpu.Registers[Register.A], Is.EqualTo(162));
+
+
+            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("AS")));
+            
+        }
+
+        [Test]
+        public void InstructionADDMemRef_AllFlagsLow_AllFlagsLow()
         {
             var cpu = new Cpu();
 
