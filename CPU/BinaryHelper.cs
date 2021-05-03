@@ -45,7 +45,7 @@ namespace CPU
                 if (!FlagAbbr.ContainsKey(upperCaseFlag))
                 {
                     throw new ArgumentOutOfRangeException(nameof(flagString), flagString,
-                        $"Every char in {nameof(flagString)} must be a valid flag identifier present in FlagAbbr.");
+                        $"Every char in {nameof(flagString)} must be a valid flag identifier present in {nameof(FlagAbbr)}.");
                 }
 
                 constructedFlagSelector |= FlagAbbr[upperCaseFlag];
