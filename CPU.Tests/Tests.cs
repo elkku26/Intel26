@@ -13,8 +13,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionADDRegister_AllFlagsLow_ParitySignHigh()
         {
-            var cpu = new Cpu();
-            cpu.Registers[Register.B] = 130;
+            var cpu = new Cpu {Registers = {[Register.B] = 130}};
             Instructions.Add(cpu, Register.B);
 
             //Check that the value in the accumulator is correct
@@ -27,10 +26,8 @@ namespace CPU.Tests
         [Test]
         public void InstructionADDRegister_AllFlagsLow_ZeroCarryParityAuxHigh()
         {
-            var cpu = new Cpu();
-            cpu.Registers[Register.A] = 255;
-            cpu.Registers[Register.B] = 1;
-            
+            var cpu = new Cpu {Registers = {[Register.A] = 255, [Register.B] = 1}};
+
             Instructions.Add(cpu, Register.B);
             
             //Check that the value in the accumulator is correct
@@ -44,10 +41,8 @@ namespace CPU.Tests
         [Test]
         public void InstructionADDRegister_AllFlagsLow_AuxSignHigh()
         {
-            var cpu = new Cpu();
-            cpu.Registers[Register.A] = 46;
-            cpu.Registers[Register.B] = 116;
-            
+            var cpu = new Cpu {Registers = {[Register.A] = 46, [Register.B] = 116}};
+
             Instructions.Add(cpu, Register.B);
             
             //Check that the value in the accumulator is correct
@@ -61,11 +56,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionADDMemRef_AllFlagsLow_AllFlagsLow()
         {
-            var cpu = new Cpu();
-
-            cpu.Memory[100] = 118;
-
-            cpu.Registers[Register.MRef] = 100;
+            var cpu = new Cpu {Memory = {[100] = 118}, Registers = {[Register.MRef] = 100}};
 
             Instructions.Add(cpu, Register.MRef);
 
@@ -80,8 +71,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionADCToRegister_CarryHigh_ParitySignHigh()
         {
-            var cpu = new Cpu();
-            cpu.Registers[Register.B] = 131;
+            var cpu = new Cpu {Registers = {[Register.B] = 131}};
             cpu.SetFlags(1, FlagSelector.Carry, cpu);
             Instructions.Adc(cpu, Register.B);
 
@@ -95,8 +85,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionMOVFromBToC_AllFlagsLow_NoChange()
         {
-            var cpu = new Cpu();
-            cpu.Registers[Register.B] = 6;
+            var cpu = new Cpu {Registers = {[Register.B] = 6}};
             Instructions.Mov(cpu, Register.B, Register.C);
 
             Assert.That(cpu.Registers[Register.C], Is.EqualTo(6));
@@ -113,8 +102,7 @@ namespace CPU.Tests
         [Test]
         public void BinaryHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
-            var cpu = new Cpu();
-            cpu.Flags = new byte();
+            var cpu = new Cpu {Flags = new byte()};
             cpu.SetFlags(1, FlagConstructor("CPAZS"), cpu);
 
             //Check that carry is set
@@ -134,8 +122,7 @@ namespace CPU.Tests
         [Test]
         public void BinaryHelperSetFlag_ParitySignHigh_SetParityLow()
         {
-            var cpu = new Cpu();
-            cpu.Flags = FlagConstructor("PS");
+            var cpu = new Cpu {Flags = FlagConstructor("PS")};
             cpu.SetFlags(0, FlagSelector.Parity, cpu);
 
             //Check that the correct flags are set
