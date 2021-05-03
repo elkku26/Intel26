@@ -83,6 +83,20 @@ namespace CPU.Tests
         }
 
         [Test]
+        public void InstructionADCMemRef_AllFlagsLow_AllFlagsLow()
+        {
+            var cpu = new Cpu {Memory = {[100] = 118}, Registers = {[Register.MRef] = 100}};
+
+            Instructions.Adc(cpu, Register.MRef);
+
+            //Check that the value in the accumulator is correct
+            Assert.That(cpu.Memory[cpu.Registers[Register.MRef]], Is.EqualTo(118));
+
+            //Check that all flags are empty
+            Assert.That(cpu.Flags, Is.Zero);
+        }
+
+        [Test]
         public void InstructionMOVFromBToC_AllFlagsLow_NoChange()
         {
             var cpu = new Cpu {Registers = {[Register.B] = 6}};
@@ -122,7 +136,8 @@ namespace CPU.Tests
         [Test]
         public void BinaryHelperSetFlag_ParitySignHigh_SetParityLow()
         {
-            var cpu = new Cpu {Flags = FlagConstructor("PS")};
+            var cpu = new Cpu();
+            cpu.Flags = FlagConstructor("PS");
             cpu.SetFlags(0, FlagSelector.Parity, cpu);
 
             //Check that the correct flags are set
