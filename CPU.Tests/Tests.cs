@@ -74,7 +74,7 @@ namespace CPU.Tests
     {
 
         [Test]
-        public void BitHelperSetFlag_AllFlagsLow_SetAllHigh()
+        public void BinaryHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
             var cpu = new Cpu();
             cpu.Flags = new byte();
@@ -85,7 +85,7 @@ namespace CPU.Tests
         }
 
         [Test]
-        public void BitHelperFlagConstructor_CreateParityAuxSelector_Success()
+        public void BinaryHelperFlagConstructor_CreateParityAuxSelector_Success()
         {
             var selector = FlagConstructor("PA");
 
@@ -95,7 +95,7 @@ namespace CPU.Tests
 
 
         [Test]
-        public void BitHelperSetFlag_ParitySignHigh_SetParityLow()
+        public void BinaryHelperSetFlag_ParitySignHigh_SetParityLow()
         {
             var cpu = new Cpu();
             cpu.Flags = FlagConstructor("PS");
@@ -107,13 +107,13 @@ namespace CPU.Tests
 
         }
         [Test]
-        public void BitHelperParityCounter_UnevenParity_Return0()
+        public void BinaryHelperParityCounter_UnevenParity_Return0()
         {
             var parity = ParityCounter(0b00011111);
             Assert.That(parity, Is.Zero);
         }
         [Test]
-        public void BitHelperParityCounter_EvenParity_Return1()
+        public void BinaryHelperParityCounter_EvenParity_Return1()
         {
             var parity = ParityCounter(0b00001111);
             Assert.That(parity, Is.EqualTo(1));
