@@ -325,8 +325,7 @@ namespace CPU
             cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
         }
-
-
+        
         internal static void Sub(Cpu cpu, int register)
         {
             DebugPrint("SUB", cpu);
@@ -403,6 +402,74 @@ namespace CPU
         internal static void Sbb(Cpu cpu, int register)
         {
             DebugPrint("SBB", cpu);
+            
+            int subtrahend;
+            int minuend = cpu.Registers[Register.A];
+
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                subtrahend = cpu.Registers[register] + (cpu.Flags & FlagSelector.Carry);
+            else
+                //Set the working int as the memory reference
+                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]] + (cpu.Flags & FlagSelector.Carry);
+
+            int twosComplementSubtrahend = GetTwosComplement(subtrahend);
+            
+            var newAccumulatorTotal = minuend + twosComplementSubtrahend;
+
+            //Only set the borrow (carry) flag if there's no carry out of bit 7
+            if (newAccumulatorTotal < 255)
+            {
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+            }
+
+            // Set/unset the zero bit, very straightforward
+            if ((newAccumulatorTotal & 0xFF) == 0)
+            {
+                cpu.SetFlags(1, FlagSelector.Zero, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Zero, cpu);
+            }
+
+            //Check parity and set/unset parity bit appropriately
+            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
+            {
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            }
+
+            //Set/unset the aux carry flag
+            if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
+            {
+                //Set the aux carry flag to 1
+                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+            }
+            else
+            {
+                //Set the aux carry flag to 0
+                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+            }
+            
+            //Check if Sign bit should be set
+            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
+                //Set the sign bit to 1
+                cpu.SetFlags(1, FlagSelector.Sign, cpu);
+            else
+                //Set the sign bit to 0
+                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+
+
+            //Set the accumulator to its new value
+            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
             throw new NotImplementedException("Unimplemented SBB");
         }
