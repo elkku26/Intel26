@@ -366,7 +366,7 @@ namespace CPU
             }
 
             //Check parity and set/unset parity bit appropriately
-            if (ParityCounter(newAccumulatorTotal) == 1)
+            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
             {
                 cpu.SetFlags(1, FlagSelector.Parity, cpu);
             }
