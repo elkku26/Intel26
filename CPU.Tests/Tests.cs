@@ -107,6 +107,15 @@ namespace CPU.Tests
             Assert.That(cpu.Registers[Register.B], Is.EqualTo(6));
             Assert.That(cpu.Flags, Is.Zero);
         }
+
+        [Test]
+        public void InstructionSUB_A_AllFlagsLow_ParityZeroAuxHigh()
+        {
+            var cpu = new Cpu {Registers = {[Register.A] = 0x3E}};
+            Instructions.Sub(cpu, Register.A);
+            
+            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PZA")));
+        }
     }
 
     [TestFixture]
