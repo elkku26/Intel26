@@ -39,19 +39,28 @@ namespace CPU
         {
             var constructedFlagSelector = new byte();
 
-            foreach (char flag in flagString)
+            foreach (var flag in flagString)
             {
-                var upperCaseFlag = Char.ToUpper(flag);
+                var upperCaseFlag = char.ToUpper(flag);
+
                 if (!FlagAbbr.ContainsKey(upperCaseFlag))
-                {
                     throw new ArgumentOutOfRangeException(nameof(flagString), flagString,
                         $"Every char in {nameof(flagString)} must be a valid flag identifier present in {nameof(FlagAbbr)}.");
-                }
 
                 constructedFlagSelector |= FlagAbbr[upperCaseFlag];
             }
 
             return constructedFlagSelector;
+        }
+
+        internal static byte GetTwosComplement(int valueToCheck)
+        {
+            if (valueToCheck > 255)
+                throw new ArgumentOutOfRangeException(nameof(valueToCheck), valueToCheck,
+                    $"{nameof(valueToCheck)} should be no larger than one byte (255)");
+
+            return (byte) ((~valueToCheck + 1) & 0xFF);
+
         }
     }
 }
