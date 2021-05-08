@@ -20,6 +20,12 @@ namespace CPU
 
             };
 
+        /// <summary>
+        /// Takes in a value and returns its parity
+        /// </summary>
+        /// <param name="valueToCheck"></param>
+        /// <returns>Either 1 or 0 depending on the parity</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         internal static int ParityCounter(int valueToCheck)
         {
 
@@ -35,6 +41,13 @@ namespace CPU
         }
 
 
+        /// <summary>
+        /// Constructs a byte that can be used to check specific CPU flags
+        /// </summary>
+        /// <param name="flagString">A string comprising of the flags that should be constructed
+        /// </param>
+        /// <returns>A byte that for</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         internal static byte FlagConstructor(string flagString)
         {
             var constructedFlagSelector = new byte();
@@ -53,6 +66,11 @@ namespace CPU
             return constructedFlagSelector;
         }
 
+        /// <summary>
+        /// Returns the two's complement of a value
+        /// </summary>
+        /// <param name="valueToCheck"></param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         internal static byte GetTwosComplement(int valueToCheck)
         {
             if (valueToCheck > 255)
