@@ -12,6 +12,7 @@ namespace CPU
         InvalidPathArgument = 2,
         OutOfMemory = 3
     }
+
     internal readonly struct Register
     {
         public const int B = 0;
@@ -60,17 +61,11 @@ namespace CPU
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            if (args.Length == 0)
-            {
-                Die(Error.InvalidPathArgument);
-            }
+            if (args.Length == 0) Die(Error.InvalidPathArgument);
 
             var fullPath = args[0];
 
-            if (!File.Exists(fullPath))
-            {
-                Die(Error.FileNotFound, "Please enter a file as the first argument.");
-            }
+            if (!File.Exists(fullPath)) Die(Error.FileNotFound, "Please enter a file as the first argument.");
 
             var cpu = new Cpu(fullPath);
             cpu.StartCpu();
@@ -131,7 +126,13 @@ namespace CPU
             while (true) Step();
         }
 
-
+        
+        /// <summary>
+        /// Sets and unsets CPU flags
+        /// </summary>
+        /// <param name="status">The status of the bits that are altered</param>
+        /// <param name="selector">Marks the bits that should be set/unset</param>
+        /// <param name="cpu">The Cpu instance</param>
         public void SetFlags(int status, int selector, Cpu cpu)
         {
             cpu.Flags = (byte) (status == 1 ? cpu.Flags | selector : cpu.Flags & ~selector & 0xFF);
@@ -140,10 +141,7 @@ namespace CPU
         private void Step()
         {
 
-            if (Pc == Memory.Length)
-            {
-                Die(Error.OutOfMemory);
-            }
+            if (Pc == Memory.Length) Die(Error.OutOfMemory);
             _opCodeByte = Memory[Pc];
 
             //Debug.WriteLine("Current opcode: Hex 0x{0:X}, Bin {1}", _opCodeByte, Convert.ToString(_opCodeByte, 2).PadLeft(8, '0'));
