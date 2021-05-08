@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using static CPU.BinaryHelper;
 
@@ -29,7 +30,7 @@ namespace CPU.Tests
             var cpu = new Cpu {Registers = {[Register.A] = 255, [Register.B] = 1}};
 
             Instructions.Add(cpu, Register.B);
-            
+
             //Check that the value in the accumulator is correct
             // (255 + 1) & 0xFF = 0
             Assert.That(cpu.Registers[Register.A], Is.EqualTo(0));
@@ -44,13 +45,13 @@ namespace CPU.Tests
             var cpu = new Cpu {Registers = {[Register.A] = 46, [Register.B] = 116}};
 
             Instructions.Add(cpu, Register.B);
-            
+
             //Check that the value in the accumulator is correct
             Assert.That(cpu.Registers[Register.A], Is.EqualTo(162));
 
 
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("AS")));
-            
+
         }
 
         [Test]
@@ -112,7 +113,7 @@ namespace CPU.Tests
     public class HelperTests
     {
 
-        
+
         [Test]
         public void BinaryHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
@@ -157,6 +158,22 @@ namespace CPU.Tests
             var parity = ParityCounter(0b00001111);
             Assert.That(parity, Is.EqualTo(1));
         }
+
+        [Test]
+        
+            public void BinaryHelperGetTwosComplement_Success()
+            {
+                var twosComplement = GetTwosComplement(10);
+                Assert.That(twosComplement, Is.EqualTo(0xF6));
+            }
+
+            [Test]
+            public void BinaryHelperGetTwosComplement_ArgumentOutOfRange()
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(
+                    delegate { GetTwosComplement(0xFFF); }
+                    );
+            }
     }
 
 }
