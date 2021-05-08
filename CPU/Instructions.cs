@@ -345,15 +345,59 @@ namespace CPU
             
             var newAccumulatorTotal = minuend + twosComplementSubtrahend;
 
+            //Only set the borrow (carry) flag if there's no carry out of bit 7
             if (newAccumulatorTotal < 255)
+            {
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
+            }
+            else
             {
                 cpu.SetFlags(0, FlagSelector.Carry, cpu);
             }
+
+            // Set/unset the zero bit, very straightforward
+            if ((newAccumulatorTotal & 0xFF) == 0)
+            {
+                cpu.SetFlags(1, FlagSelector.Zero, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Zero, cpu);
+            }
+
+            //Check parity and set/unset parity bit appropriately
+            if (ParityCounter(newAccumulatorTotal) == 1)
+            {
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            }
+
+            //Set/unset the aux carry flag
+            if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
+            {
+                //Set the aux carry flag to 1
+                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+            }
+            else
+            {
+                //Set the aux carry flag to 0
+                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+            }
             
-            
+            //Check if Sign bit should be set
+            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
+                //Set the sign bit to 1
+                cpu.SetFlags(1, FlagSelector.Sign, cpu);
+            else
+                //Set the sign bit to 0
+                cpu.SetFlags(0, FlagSelector.Sign, cpu);
 
 
-            throw new NotImplementedException("Unimplemented SUB");
+            //Set the accumulator to its new value
+            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
         }
 
         internal static void Sbb(Cpu cpu, int register)
