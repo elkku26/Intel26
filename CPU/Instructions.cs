@@ -205,7 +205,7 @@ namespace CPU
                 addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
             //Make sure the new accumulator total isn't any more than 255 (1 byte)
-            var newAccumulatorTotal = (addToAccumulator + oldAccumulatorTotal);
+            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
 
 
             //Check if Carry bit should be set
@@ -304,7 +304,7 @@ namespace CPU
 
 
             //Check if Parity bit should be set
-            if (ParityCounter(newAccumulatorTotal) == 1)
+            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
                 //Set the parity bit to 1
                 cpu.SetFlags(1, FlagSelector.Parity, cpu);
             else
@@ -321,7 +321,7 @@ namespace CPU
                 cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
 
 
-            //Set the accumulator to its new value and cast it to one byte to 'force' an overflow
+            //Set the accumulator to its new value
             cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
 
         }
@@ -330,6 +330,28 @@ namespace CPU
         internal static void Sub(Cpu cpu, int register)
         {
             DebugPrint("SUB", cpu);
+            
+            int subtrahend;
+            int minuend = cpu.Registers[Register.A];
+
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                subtrahend = cpu.Registers[register];
+            else
+                //Set the working int as the memory reference
+                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
+
+            int twosComplementSubtrahend = GetTwosComplement(subtrahend);
+            
+            var newAccumulatorTotal = minuend + twosComplementSubtrahend;
+
+            if (newAccumulatorTotal < 255)
+            {
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+            }
+            
+            
+
 
             throw new NotImplementedException("Unimplemented SUB");
         }
