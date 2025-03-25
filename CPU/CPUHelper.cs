@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace CPU
 {
     /// <summary>
-    /// A helper class for dealing with bit/byte-related tasks
+    /// A helper class for dealing with repetitive generic tasks
     /// </summary>
-    internal static class BinaryHelper
+    internal static class CPUHelper
     {
 
         private static readonly Dictionary<char, byte> FlagAbbr
@@ -44,7 +44,7 @@ namespace CPU
         /// <summary>
         /// Constructs a byte that can be used to check specific CPU flags
         /// </summary>
-        /// <param name="flagString">A string comprising of the flags that should be constructed
+        /// <param name="flagString">A string comprising the flags that should be constructed
         /// </param>
         /// <returns>A byte that for</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -78,7 +78,46 @@ namespace CPU
                     $"{nameof(valueToCheck)} should be no larger than one byte (255)");
 
             return (byte) ((~valueToCheck + 1) & 0xFF);
+            
 
         }
+        
+        internal static void SetParity(Cpu cpu, int value)
+        {
+            if (ParityCounter(value & 0xFF) == 1)
+            {
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            }
+        }
+        
+        internal static void SetCarry(Cpu cpu, int value)
+        {
+            if (value > 255)
+            {
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            }
+        }
+        
+        internal static void SetBorrow(Cpu cpu, int value)
+        {
+            if (value < 255)
+            {
+                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            }
+        }
+
     }
+     
 }

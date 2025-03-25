@@ -1,8 +1,9 @@
 using System;
-using static CPU.BinaryHelper;
+using System.Diagnostics;
+using static CPU.CPUHelper;
 using static CPU.DebugHelper;
 
-// ReSharper disable ConvertIfStatementToConditionalTernaryExpression
+// ReSharper di1le ConvertIfStatementToConditionalTernaryExpression
 
 namespace CPU
 {
@@ -208,14 +209,8 @@ namespace CPU
             var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
 
 
-            //Check if Carry bit should be set
-            if (newAccumulatorTotal > 255)
-                //Switch carry bit to 1
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
-            else
-                //Switch carry bit to 0
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
-
+            SetCarry(cpu,newAccumulatorTotal);
+           
 
             //Check if Sign bit should be set
             if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
@@ -234,15 +229,9 @@ namespace CPU
                 //Set the zero bit to 0
                 cpu.SetFlags(0, FlagSelector.Zero, cpu);
 
-
-            //Check if Parity bit should be set
-            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
-                //Set the parity bit to 1
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
-            else
-                //Set the parity bit to 0
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
-
+            
+            SetParity(cpu, newAccumulatorTotal);
+            
 
             //Check if Aux Carry bit should be set
             if ((oldAccumulatorTotal & 0xF) + (addToAccumulator & 0xF) > 15)
@@ -276,14 +265,7 @@ namespace CPU
             var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal + (cpu.Flags & FlagSelector.Carry);
 
 
-            //Check if Carry bit should be set
-            if (newAccumulatorTotal > 255)
-                //Switch carry bit to 1
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
-            else
-                //Switch carry bit to 0
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
-
+            SetCarry(cpu,newAccumulatorTotal);
 
             //Check if Sign bit should be set
             if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
@@ -303,14 +285,7 @@ namespace CPU
                 cpu.SetFlags(0, FlagSelector.Zero, cpu);
 
 
-            //Check if Parity bit should be set
-            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
-                //Set the parity bit to 1
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
-            else
-                //Set the parity bit to 0
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
-
+            SetParity(cpu, newAccumulatorTotal);
 
             //Check if Aux Carry bit should be set
             if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
@@ -345,15 +320,9 @@ namespace CPU
             var newAccumulatorTotal = minuend + twosComplementSubtrahend;
 
             //Only set the borrow (carry) flag if there's no carry out of bit 7
-            if (newAccumulatorTotal < 255)
-            {
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
-            }
-
+            
+            SetBorrow(cpu, newAccumulatorTotal);
+            
             // Set/unset the zero bit, very straightforward
             if ((newAccumulatorTotal & 0xFF) == 0)
             {
@@ -363,16 +332,8 @@ namespace CPU
             {
                 cpu.SetFlags(0, FlagSelector.Zero, cpu);
             }
-
-            //Check parity and set/unset parity bit appropriately
-            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
-            {
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
-            }
+            
+            SetParity(cpu, newAccumulatorTotal);
 
             //Set/unset the aux carry flag
             if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
@@ -417,15 +378,8 @@ namespace CPU
             
             var newAccumulatorTotal = minuend + twosComplementSubtrahend;
 
-            //Only set the borrow (carry) flag if there's no carry out of bit 7
-            if (newAccumulatorTotal < 255)
-            {
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
-            }
+            SetCarry(cpu,newAccumulatorTotal);
+            
 
             // Set/unset the zero bit, very straightforward
             if ((newAccumulatorTotal & 0xFF) == 0)
@@ -437,15 +391,7 @@ namespace CPU
                 cpu.SetFlags(0, FlagSelector.Zero, cpu);
             }
 
-            //Check parity and set/unset parity bit appropriately
-            if (ParityCounter(newAccumulatorTotal & 0xFF) == 1)
-            {
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
-            }
+            SetParity(cpu, newAccumulatorTotal);
 
             //Set/unset the aux carry flag
             if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
@@ -585,8 +531,9 @@ namespace CPU
         internal static void Jmp(Cpu cpu)
         {
             DebugPrint("JMP", cpu);
-
-            throw new NotImplementedException("Unimplemented JMP");
+            
+            
+            //throw new NotImplementedException("Unimplemented JMP");
         }
 
         internal static void Jz(Cpu cpu)
