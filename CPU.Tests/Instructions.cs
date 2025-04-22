@@ -1,14 +1,26 @@
 ﻿using NUnit.Framework;
-using static CPU.BinaryHelper;
+using static CPU.CPUHelper;
 
 namespace CPU.Tests
 {
-    /// <summary>
+    
+   /// <summary>
     /// A class to test the individual instructions
     /// </summary>
     [TestFixture]
     public class InstructionTests
     {
+        [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
+        [TestCase(255, 1, 0, "ZCPA")] // AllFlagsLow_ZeroCarryParityAuxHigh
+        [TestCase(46, 116, 162, "AS")] // AllFlagsLow_AuxSignHigh
+        public void InstructionADDRegister(byte aVal, byte bVal, byte expected, string expectedFlags)
+        {
+            var cpu = new Cpu { Registers = { [Register.A] = aVal, [Register.B] = bVal } };
+            Instructions.Add(cpu, Register.B);
+
+            Assert.That(cpu.Registers[Register.A], Is.EqualTo(expected));
+            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor(expectedFlags)));
+        }
         [Test]
         public void InstructionADDRegister_AllFlagsLow_ParitySignHigh()
         {
@@ -114,6 +126,8 @@ namespace CPU.Tests
 
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PZA")));
         }
+        
     }
+    
 
 }
