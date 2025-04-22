@@ -91,7 +91,7 @@ namespace CPU
         public Cpu(string fullPath = "")
         {
             _fullPath = fullPath;
-            Flags = new byte();
+            Flags = 0;
             Memory = new byte[64000];
             Registers = new byte[8];
             Pc = 0;
@@ -162,7 +162,7 @@ namespace CPU
                         // 0x01
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.B);
+                            Instructions.Lxi(this, RegisterPair.B, _opCodeByte);
 
                             break;
 
@@ -280,7 +280,7 @@ namespace CPU
                         // 0x11
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.D);
+                            //Instructions.Lxi(this, RegisterPair.D);
 
                             break;
 
@@ -398,7 +398,7 @@ namespace CPU
                         // 0x21
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.H);
+                            //Instructions.Lxi(this, RegisterPair.H);
 
                             break;
 
@@ -516,7 +516,7 @@ namespace CPU
                         // 0x31
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.SP);
+                            //Instructions.Lxi(this, RegisterPair.SP);
 
                             break;
 

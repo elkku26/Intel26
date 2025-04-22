@@ -10,7 +10,7 @@ namespace CPU
 
 
     /// <summary>
-    ///     Holds all of the possible instructions
+    ///     Holds all the possible instructions
     /// </summary>
     public static class Instructions
     {
@@ -20,10 +20,11 @@ namespace CPU
             DebugPrint("NOP", cpu);
         }
 
-        internal static void Lxi(Cpu cpu, int registerPair)
+        internal static void Lxi(Cpu cpu, int registerPair, int immediate)
         {
-            DebugPrint("LXI", cpu);
 
+            DebugPrint("LXI", cpu);
+            
             throw new NotImplementedException("Unimplemented LXI");
         }
 
@@ -45,15 +46,72 @@ namespace CPU
         {
             DebugPrint("INR", cpu);
 
-            throw new NotImplementedException("Unimplemented INR");
+            int oldValue;
+            
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                oldValue = cpu.Registers[register];
+            else
+                //Set the working int as the memory reference
+                oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
+            
+            int newValue = oldValue + 1;
+
+            
+            SetSign(cpu, newValue);
+
+            SetZero(cpu, newValue);
+            
+            SetParity(cpu, newValue);
+            
+            SetAux(cpu, newValue, oldValue);
+
+
+            if (register != Register.MRef)
+            {
+                cpu.Registers[register] = (byte) (newValue & 0xFF);
+            }
+            else
+            {
+                cpu.Memory[cpu.Registers[register]] = (byte) (newValue & 0xFF);
+            }
+            
         }
 
         internal static void Dcr(Cpu cpu, int register)
         {
             DebugPrint("DCR", cpu);
 
-            throw new NotImplementedException("Unimplemented DCR");
-        }
+            int oldValue;
+            
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                oldValue = cpu.Registers[register];
+            else
+                //Set the working int as the memory reference
+                oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
+            
+            
+            int newValue = oldValue - 1;
+
+            
+            SetSign(cpu, newValue);
+
+            SetZero(cpu, newValue);
+            
+            SetParity(cpu, newValue);
+            
+            SetAux(cpu, newValue, oldValue);
+
+
+            if (register != Register.MRef)
+            {
+                cpu.Registers[register] = (byte) (newValue & 0xFF);
+            }
+            else
+            {
+                cpu.Memory[cpu.Registers[register]] = (byte) (newValue & 0xFF);
+            }        }
 
         internal static void Mvi(Cpu cpu, int register)
         {
@@ -140,8 +198,7 @@ namespace CPU
         internal static void Cma(Cpu cpu)
         {
             DebugPrint("CMA", cpu);
-
-            throw new NotImplementedException("Unimplemented CMA");
+            cpu.Registers[Register.A] = (byte) ~cpu.Registers[Register.A];
         }
 
         internal static void Rnz(Cpu cpu)
@@ -196,7 +253,7 @@ namespace CPU
             DebugPrint("ADD", cpu);
 
             int addToAccumulator;
-            int oldAccumulatorTotal = cpu.Registers[Register.A];
+            int oldAccumulator = cpu.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
@@ -206,44 +263,22 @@ namespace CPU
                 addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
             //Make sure the new accumulator total isn't any more than 255 (1 byte)
-            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal;
+            var newAccumulator = addToAccumulator + oldAccumulator;
 
 
-            SetCarry(cpu,newAccumulatorTotal);
-           
+            SetCarry(cpu, newAccumulator);
 
-            //Check if Sign bit should be set
-            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
-                //Set the sign bit to 1
-                cpu.SetFlags(1, FlagSelector.Sign, cpu);
-            else
-                //Set the sign bit to 0
-                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+            SetSign(cpu, newAccumulator);
 
-
-            //Check if Zero bit should be set
-            if ((newAccumulatorTotal & 0xFF) == 0)
-                //Set the zero bit to 1
-                cpu.SetFlags(1, FlagSelector.Zero, cpu);
-            else
-                //Set the zero bit to 0
-                cpu.SetFlags(0, FlagSelector.Zero, cpu);
-
+            SetZero(cpu, newAccumulator);
             
-            SetParity(cpu, newAccumulatorTotal);
+            SetParity(cpu, newAccumulator);
             
-
-            //Check if Aux Carry bit should be set
-            if ((oldAccumulatorTotal & 0xF) + (addToAccumulator & 0xF) > 15)
-                //Set the aux carry flag to 1
-                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
-            else
-                //Set the aux carry flag to 0
-                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+            SetAux(cpu, oldAccumulator, addToAccumulator);
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
 
         }
 
@@ -253,7 +288,7 @@ namespace CPU
 
 
             int addToAccumulator;
-            int oldAccumulatorTotal = cpu.Registers[Register.A];
+            int oldAccumulator = cpu.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
@@ -262,42 +297,31 @@ namespace CPU
                 //Set the working int as the memory reference
                 addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
-            var newAccumulatorTotal = addToAccumulator + oldAccumulatorTotal + (cpu.Flags & FlagSelector.Carry);
+            
+            var newAccumulator = addToAccumulator + oldAccumulator + (cpu.Flags & FlagSelector.Carry);
 
 
-            SetCarry(cpu,newAccumulatorTotal);
+            SetCarry(cpu, newAccumulator);
 
-            //Check if Sign bit should be set
-            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
-                //Set the sign bit to 1
-                cpu.SetFlags(1, FlagSelector.Sign, cpu);
-            else
-                //Set the sign bit to 0
-                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+            SetSign(cpu, newAccumulator);
+            
+            SetZero(cpu, newAccumulator);
 
+            SetParity(cpu, newAccumulator);
 
-            //Check if Zero bit should be set
-            if ((newAccumulatorTotal & 0xFF) == 0)
-                //Set the zero bit to 1
-                cpu.SetFlags(1, FlagSelector.Zero, cpu);
-            else
-                //Set the zero bit to 0
-                cpu.SetFlags(0, FlagSelector.Zero, cpu);
-
-
-            SetParity(cpu, newAccumulatorTotal);
-
+            SetAux(cpu, oldAccumulator, addToAccumulator);
+            
             //Check if Aux Carry bit should be set
-            if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
+            //if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
                 //Set the aux carry flag to 1
-                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
-            else
+            //    cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+            //else
                 //Set the aux carry flag to 0
-                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+            //    cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
 
         }
         
@@ -317,47 +341,24 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
             
-            var newAccumulatorTotal = minuend + twosComplementSubtrahend;
+            var newAccumulator = minuend + twosComplementSubtrahend;
 
             //Only set the borrow (carry) flag if there's no carry out of bit 7
             
-            SetBorrow(cpu, newAccumulatorTotal);
-            
-            // Set/unset the zero bit, very straightforward
-            if ((newAccumulatorTotal & 0xFF) == 0)
-            {
-                cpu.SetFlags(1, FlagSelector.Zero, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Zero, cpu);
-            }
-            
-            SetParity(cpu, newAccumulatorTotal);
+            SetBorrow(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
 
             //Set/unset the aux carry flag
-            if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
-            {
-                //Set the aux carry flag to 1
-                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
-            }
-            else
-            {
-                //Set the aux carry flag to 0
-                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
-            }
+            //TODO I'm note 100% sure my understanding of aux carry is right here
+            SetAux(cpu, minuend, twosComplementSubtrahend);
             
-            //Check if Sign bit should be set
-            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
-                //Set the sign bit to 1
-                cpu.SetFlags(1, FlagSelector.Sign, cpu);
-            else
-                //Set the sign bit to 0
-                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+            SetSign(cpu, newAccumulator);
+
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
         }
 
         internal static void Sbb(Cpu cpu, int register)
@@ -376,90 +377,118 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
             
-            var newAccumulatorTotal = minuend + twosComplementSubtrahend;
+            var newAccumulator = minuend + twosComplementSubtrahend;
 
-            SetCarry(cpu,newAccumulatorTotal);
+            SetCarry(cpu,newAccumulator);
             
 
-            // Set/unset the zero bit, very straightforward
-            if ((newAccumulatorTotal & 0xFF) == 0)
-            {
-                cpu.SetFlags(1, FlagSelector.Zero, cpu);
-            }
-            else
-            {
-                cpu.SetFlags(0, FlagSelector.Zero, cpu);
-            }
-
-            SetParity(cpu, newAccumulatorTotal);
-
-            //Set/unset the aux carry flag
-            if ((minuend & 0xF) + (subtrahend & 0xF) > 15)
-            {
-                //Set the aux carry flag to 1
-                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
-            }
-            else
-            {
-                //Set the aux carry flag to 0
-                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
-            }
+            SetZero(cpu, newAccumulator);
             
-            //Check if Sign bit should be set
-            if ((newAccumulatorTotal & FlagSelector.Sign) == FlagSelector.Sign)
-                //Set the sign bit to 1
-                cpu.SetFlags(1, FlagSelector.Sign, cpu);
-            else
-                //Set the sign bit to 0
-                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+            SetParity(cpu, newAccumulator);
+
+
+            SetAux(cpu, minuend, subtrahend);
+            
+            
+            SetSign(cpu, newAccumulator);
+
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulatorTotal & 0xFF);
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
 
-            throw new NotImplementedException("Unimplemented SBB");
         }
 
         internal static void Ana(Cpu cpu, int register)
         {
             DebugPrint("ANA", cpu);
 
-            throw new NotImplementedException("Unimplemented ANA");
+            int newAccumulator = cpu.Registers[Register.A] & cpu.Registers[register];
+
+            SetCarry(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetSign(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
+            
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
         }
 
         internal static void Xra(Cpu cpu, int register)
         {
             DebugPrint("XRA", cpu);
+            
+            int newAccumulator = cpu.Registers[Register.A] ^ cpu.Registers[register];
+            
+            SetCarry(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetSign(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
+            SetAux(cpu, newAccumulator, cpu.Registers[register]);
+            
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
 
-            throw new NotImplementedException("Unimplemented XRA");
         }
 
         internal static void Ora(Cpu cpu, int register)
         {
             DebugPrint("ORA", cpu);
+            
+            int newAccumulator = cpu.Registers[Register.A] | cpu.Registers[register];
 
-            throw new NotImplementedException("Unimplemented ORA");
+            SetCarry(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetSign(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
+            
+            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
         }
 
 
         internal static void Cmp(Cpu cpu, int register)
         {
             DebugPrint("CMP", cpu);
+            
+            int subtrahend;
+            int minuend = cpu.Registers[Register.A];
 
-            throw new NotImplementedException("Unimplemented CMP");
-        }
+            if (register != Register.MRef)
+                //Set the working int as the register in question
+                subtrahend = cpu.Registers[register];
+            else
+                //Set the working int as the memory reference
+                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
+
+            int twosComplementSubtrahend = GetTwosComplement(subtrahend);
+            
+            var newAccumulator = minuend + twosComplementSubtrahend;
+
+            //Only set the borrow (carry) flag if there's no carry out of bit 7
+            
+            SetBorrow(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
+
+            //Set/unset the aux carry flag
+            SetAux(cpu, minuend, twosComplementSubtrahend);
+            
+            SetSign(cpu, newAccumulator);
+            
+            }
 
 
         internal static void Stc(Cpu cpu)
         {
             DebugPrint("STC", cpu);
+            
+            cpu.SetFlags(1, FlagSelector.Carry, cpu);
 
-            throw new NotImplementedException("Unimplemented STC");
         }
 
         internal static void Sbi(Cpu cpu)
         {
             DebugPrint("SBI", cpu);
+            
+            
 
             throw new NotImplementedException("Unimplemented SBI");
         }
@@ -581,8 +610,9 @@ namespace CPU
         internal static void Cmc(Cpu cpu)
         {
             DebugPrint("CMC", cpu);
+            
+            cpu.SetFlags(~(cpu.Flags & FlagSelector.Carry), FlagSelector.Carry, cpu);
 
-            throw new NotImplementedException("Unimplemented CMC");
         }
 
         internal static void Pop(Cpu cpu, int registerPair)
