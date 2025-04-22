@@ -98,11 +98,11 @@ namespace CPU
         {
             if (value > 255)
             {
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
             }
             else
             {
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
             }
         }
         
@@ -110,14 +110,48 @@ namespace CPU
         {
             if (value < 255)
             {
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+                cpu.SetFlags(1, FlagSelector.Carry, cpu);
             }
             else
             {
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+            }
+        }
+        
+        internal static void SetZero(Cpu cpu, int value)
+        {
+            if ((value & 0xFF) == 0)
+            {
+                cpu.SetFlags(1, FlagSelector.Zero, cpu);
+            }
+            else
+            {
+                cpu.SetFlags(0, FlagSelector.Zero, cpu);
             }
         }
 
+        internal static void SetSign(Cpu cpu, int value)
+        {
+            //Check if Sign bit should be set
+            if ((value & FlagSelector.Sign) == FlagSelector.Sign)
+                //Set the sign bit to 1
+                cpu.SetFlags(1, FlagSelector.Sign, cpu);
+            else
+                //Set the sign bit to 0
+                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+
+        }
+        internal static void SetAux(Cpu cpu, int value1, int value2)
+        {
+            //check if there is a carry out of bit 3
+            if ( (value1 & 0xF) + (value2 & 0xF) > 15 )
+                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+            else
+                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+
+        }
+        
+        
     }
      
 }
