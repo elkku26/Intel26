@@ -78,7 +78,7 @@ namespace CPU
     internal class Cpu
     {
         private readonly string _fullPath;
-        private byte _opCodeByte;
+        public byte OpCodeByte;
         public byte Flags;
         public byte[] Memory;
         public int Pc;
@@ -142,15 +142,15 @@ namespace CPU
         {
 
             if (Pc == Memory.Length) Die(Error.OutOfMemory);
-            _opCodeByte = Memory[Pc];
+            OpCodeByte = Memory[Pc];
 
             //Debug.WriteLine("Current opcode: Hex 0x{0:X}, Bin {1}", _opCodeByte, Convert.ToString(_opCodeByte, 2).PadLeft(8, '0'));
 
 
-            switch ((_opCodeByte & 0xF0) >> 4)
+            switch ((OpCodeByte & 0xF0) >> 4)
             {
                 case 0x0:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x00
                         case 0x0:
@@ -162,7 +162,7 @@ namespace CPU
                         // 0x01
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.B, _opCodeByte);
+                            Instructions.Lxi(this, RegisterPair.B, OpCodeByte);
 
                             break;
 
@@ -268,7 +268,7 @@ namespace CPU
                     break;
 
                 case 0x1:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x10
                         case 0x0:
@@ -386,7 +386,7 @@ namespace CPU
                     break;
 
                 case 0x2:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x20
                         case 0x0:
@@ -504,7 +504,7 @@ namespace CPU
                     break;
 
                 case 0x3:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x30
                         case 0x0:
@@ -622,7 +622,7 @@ namespace CPU
                     break;
 
                 case 0x4:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x40
                         case 0x0:
@@ -740,7 +740,7 @@ namespace CPU
                     break;
 
                 case 0x5:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x50
                         case 0x0:
@@ -858,7 +858,7 @@ namespace CPU
                     break;
 
                 case 0x6:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x60
                         case 0x0:
@@ -976,7 +976,7 @@ namespace CPU
                     break;
 
                 case 0x7:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x70
                         case 0x0:
@@ -1094,7 +1094,7 @@ namespace CPU
                     break;
 
                 case 0x8:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x80
                         case 0x0:
@@ -1212,7 +1212,7 @@ namespace CPU
                     break;
 
                 case 0x9:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0x90
                         case 0x0:
@@ -1330,7 +1330,7 @@ namespace CPU
                     break;
 
                 case 0xA:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xA0
                         case 0x0:
@@ -1448,7 +1448,7 @@ namespace CPU
                     break;
 
                 case 0xB:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xB0
                         case 0x0:
@@ -1566,7 +1566,7 @@ namespace CPU
                     break;
 
                 case 0xC:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xC0
                         case 0x0:
@@ -1684,7 +1684,7 @@ namespace CPU
                     break;
 
                 case 0xD:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xD0
                         case 0x0:
@@ -1802,7 +1802,7 @@ namespace CPU
                     break;
 
                 case 0xE:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xE0
                         case 0x0:
@@ -1920,7 +1920,7 @@ namespace CPU
                     break;
 
                 case 0xF:
-                    switch (_opCodeByte & 0xF)
+                    switch (OpCodeByte & 0xF)
                     {
                         // 0xF0
                         case 0x0:

@@ -116,7 +116,9 @@ namespace CPU
         internal static void Mvi(Cpu cpu, int register)
         {
             DebugPrint("MVI", cpu);
-
+            byte bitmask = (1 << 8) -1; //black magic bit fuckery to get the immediate data from the opcode
+            byte immediate_data = (byte) (cpu.OpCodeByte & bitmask);
+            Console.WriteLine(Convert.ToString(immediate_data, 2).PadLeft(8, '0'));
             throw new NotImplementedException("Unimplemented MVI");
         }
 
@@ -279,7 +281,6 @@ namespace CPU
 
             //Set the accumulator to its new value
             cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
-
         }
 
         internal static void Adc(Cpu cpu, int register)
@@ -310,15 +311,6 @@ namespace CPU
             SetParity(cpu, newAccumulator);
 
             SetAux(cpu, oldAccumulator, addToAccumulator);
-            
-            //Check if Aux Carry bit should be set
-            //if ((addToAccumulator & (0xF + addToAccumulator) & 0xF) > 15)
-                //Set the aux carry flag to 1
-            //    cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
-            //else
-                //Set the aux carry flag to 0
-            //    cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
-
 
             //Set the accumulator to its new value
             cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
@@ -342,8 +334,6 @@ namespace CPU
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
             
             var newAccumulator = minuend + twosComplementSubtrahend;
-
-            //Only set the borrow (carry) flag if there's no carry out of bit 7
             
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
@@ -354,9 +344,7 @@ namespace CPU
             SetAux(cpu, minuend, twosComplementSubtrahend);
             
             SetSign(cpu, newAccumulator);
-
-
-
+            
             //Set the accumulator to its new value
             cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
         }
@@ -380,16 +368,9 @@ namespace CPU
             var newAccumulator = minuend + twosComplementSubtrahend;
 
             SetCarry(cpu,newAccumulator);
-            
-
             SetZero(cpu, newAccumulator);
-            
             SetParity(cpu, newAccumulator);
-
-
             SetAux(cpu, minuend, subtrahend);
-            
-            
             SetSign(cpu, newAccumulator);
 
 
@@ -461,8 +442,6 @@ namespace CPU
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
             
             var newAccumulator = minuend + twosComplementSubtrahend;
-
-            //Only set the borrow (carry) flag if there's no carry out of bit 7
             
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
@@ -626,7 +605,10 @@ namespace CPU
         {
             DebugPrint("XCHG", cpu);
 
-            throw new NotImplementedException("Unimplemented XCHG");
+            (cpu.Registers[Register.H], cpu.Registers[Register.D]) = (cpu.Registers[Register.D], cpu.Registers[Register.H]);
+
+            (cpu.Registers[Register.L], cpu.Registers[Register.E]) = (cpu.Registers[Register.E], cpu.Registers[Register.L]);
+
         }
 
         internal static void Xthl(Cpu cpu)

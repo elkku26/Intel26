@@ -12,57 +12,18 @@ namespace CPU.Tests
     {
         [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
         [TestCase(255, 1, 0, "ZCPA")] // AllFlagsLow_ZeroCarryParityAuxHigh
-        [TestCase(46, 116, 162, "AS")] // AllFlagsLow_AuxSignHigh
-        public void InstructionADDRegister(byte aVal, byte bVal, byte expected, string expectedFlags)
+        [TestCase(46, 116, 162, "AS")]// AllFlagsLow_AuxSignHigh
+        [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
+        
+        public void InstructionADDRegister(byte a, byte b, byte expected, string expectedFlags)
         {
-            var cpu = new Cpu { Registers = { [Register.A] = aVal, [Register.B] = bVal } };
+            var cpu = new Cpu { Registers = { [Register.A] = a, [Register.B] = b } };
             Instructions.Add(cpu, Register.B);
 
             Assert.That(cpu.Registers[Register.A], Is.EqualTo(expected));
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor(expectedFlags)));
         }
-        [Test]
-        public void InstructionADDRegister_AllFlagsLow_ParitySignHigh()
-        {
-            var cpu = new Cpu {Registers = {[Register.B] = 130}};
-            Instructions.Add(cpu, Register.B);
-
-            //Check that the value in the accumulator is correct
-            Assert.That(cpu.Registers[Register.A], Is.EqualTo(130));
-
-            //Check that the parity and sign flags are set
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PS")));
-        }
-
-        [Test]
-        public void InstructionADDRegister_AllFlagsLow_ZeroCarryParityAuxHigh()
-        {
-            var cpu = new Cpu {Registers = {[Register.A] = 255, [Register.B] = 1}};
-
-            Instructions.Add(cpu, Register.B);
-
-            //Check that the value in the accumulator is correct
-            // (255 + 1) & 0xFF = 0
-            Assert.That(cpu.Registers[Register.A], Is.EqualTo(0));
-
-            //Check that Zero and Carry flags are high
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("ZCPA")));
-        }
-
-        [Test]
-        public void InstructionADDRegister_AllFlagsLow_AuxSignHigh()
-        {
-            var cpu = new Cpu {Registers = {[Register.A] = 46, [Register.B] = 116}};
-
-            Instructions.Add(cpu, Register.B);
-
-            //Check that the value in the accumulator is correct
-            Assert.That(cpu.Registers[Register.A], Is.EqualTo(162));
-
-
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("AS")));
-
-        }
+        
 
         [Test]
         public void InstructionADDMemRef_AllFlagsLow_AllFlagsLow()
