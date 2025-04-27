@@ -5,7 +5,6 @@ using static CPU.DebugHelper;
 
 namespace CPU
 {
-
     public enum Error
     {
         FileNotFound = 1,
@@ -78,12 +77,13 @@ namespace CPU
     internal class Cpu
     {
         private readonly string _fullPath;
-        public byte OpCodeByte;
         public byte Flags;
         public byte[] Memory;
-        public int Pc;
+        public byte OpCodeByte;
+        public uint Pc;
         public byte[] Registers;
-        public short Sp;
+        public ushort Sp;
+
         /// <summary>
         ///     Constructor for the CPU Class
         /// </summary>
@@ -118,7 +118,6 @@ namespace CPU
         /// </summary>
         public void StartCpu()
         {
-
             Memory = LoadData(_fullPath);
 
             Debug.WriteLine("Start successful");
@@ -126,21 +125,20 @@ namespace CPU
             while (true) Step();
         }
 
-        
+
         /// <summary>
-        /// Sets and unsets CPU flags
+        ///     Sets and unsets CPU flags
         /// </summary>
         /// <param name="status">The status of the bits that are altered</param>
         /// <param name="selector">Marks the bits that should be set/unset</param>
         /// <param name="cpu">The Cpu instance</param>
         public void SetFlags(int status, int selector, Cpu cpu)
         {
-            cpu.Flags = (byte) (status == 1 ? cpu.Flags | selector : cpu.Flags & ~selector & 0xFF);
+            cpu.Flags = (byte)(status == 1 ? cpu.Flags | selector : cpu.Flags & ~selector & 0xFF);
         }
 
         private void Step()
         {
-
             if (Pc == Memory.Length) Die(Error.OutOfMemory);
             OpCodeByte = Memory[Pc];
 
@@ -162,7 +160,7 @@ namespace CPU
                         // 0x01
                         case 0x1:
 
-                            Instructions.Lxi(this, RegisterPair.B, OpCodeByte);
+                            Instructions.Lxi(this, RegisterPair.B, Memory[Pc + 1]);
 
                             break;
 

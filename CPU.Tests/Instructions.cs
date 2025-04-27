@@ -3,18 +3,16 @@ using static CPU.CPUHelper;
 
 namespace CPU.Tests
 {
-    
-   /// <summary>
-    /// A class to test the individual instructions
+    /// <summary>
+    ///     A class to test the individual instructions
     /// </summary>
     [TestFixture]
     public class InstructionTests
     {
         [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
         [TestCase(255, 1, 0, "ZCPA")] // AllFlagsLow_ZeroCarryParityAuxHigh
-        [TestCase(46, 116, 162, "AS")]// AllFlagsLow_AuxSignHigh
+        [TestCase(46, 116, 162, "AS")] // AllFlagsLow_AuxSignHigh
         [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
-        
         public void InstructionADDRegister(byte a, byte b, byte expected, string expectedFlags)
         {
             var cpu = new Cpu { Registers = { [Register.A] = a, [Register.B] = b } };
@@ -23,12 +21,12 @@ namespace CPU.Tests
             Assert.That(cpu.Registers[Register.A], Is.EqualTo(expected));
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor(expectedFlags)));
         }
-        
+
 
         [Test]
         public void InstructionADDMemRef_AllFlagsLow_AllFlagsLow()
         {
-            var cpu = new Cpu {Memory = {[100] = 118}, Registers = {[Register.MRef] = 100}};
+            var cpu = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
 
             Instructions.Add(cpu, Register.MRef);
 
@@ -43,7 +41,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionADCToRegister_CarryHigh_ParitySignHigh()
         {
-            var cpu = new Cpu {Registers = {[Register.B] = 131}};
+            var cpu = new Cpu { Registers = { [Register.B] = 131 } };
             cpu.SetFlags(1, FlagSelector.Carry, cpu);
             Instructions.Adc(cpu, Register.B);
 
@@ -57,7 +55,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionADCMemRef_AllFlagsLow_AllFlagsLow()
         {
-            var cpu = new Cpu {Memory = {[100] = 118}, Registers = {[Register.MRef] = 100}};
+            var cpu = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
 
             Instructions.Adc(cpu, Register.MRef);
 
@@ -71,7 +69,7 @@ namespace CPU.Tests
         [Test]
         public void InstructionMOVFromBToC_AllFlagsLow_NoChange()
         {
-            var cpu = new Cpu {Registers = {[Register.B] = 6}};
+            var cpu = new Cpu { Registers = { [Register.B] = 6 } };
             Instructions.Mov(cpu, Register.B, Register.C);
 
             Assert.That(cpu.Registers[Register.C], Is.EqualTo(6));
@@ -82,13 +80,45 @@ namespace CPU.Tests
         [Test]
         public void InstructionSUB_A_AllFlagsLow_ParityZeroAuxHigh()
         {
-            var cpu = new Cpu {Registers = {[Register.A] = 0x3E}};
+            var cpu = new Cpu { Registers = { [Register.A] = 0x3E } };
             Instructions.Sub(cpu, Register.A);
 
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PZA")));
         }
-        
-    }
-    
 
+
+        [TestCase(RegisterPair.B, (ushort)0xFFAA)]
+        [TestCase(RegisterPair.D, (ushort)0xFFAA)]
+        [TestCase(RegisterPair.H, (ushort)0xFFAA)]
+        [TestCase(RegisterPair.SP, (ushort)0xFFAA)]
+        public void InstructionLXI(int registerPair, ushort immediate)
+        {
+            var cpu = new Cpu();
+            Instructions.Lxi(cpu, registerPair, immediate);
+
+            switch (registerPair)
+            {
+                case RegisterPair.B:
+                    Assert.That(cpu.Registers[Register.B], Is.EqualTo(0xAA));
+                    Assert.That(cpu.Registers[Register.C], Is.EqualTo(0xFF));
+
+                    break;
+
+                case RegisterPair.D:
+                    Assert.That(cpu.Registers[Register.D], Is.EqualTo(0xAA));
+                    Assert.That(cpu.Registers[Register.E], Is.EqualTo(0xFF));
+                    break;
+
+                case RegisterPair.H:
+                    Assert.That(cpu.Registers[Register.H], Is.EqualTo(0xAA));
+                    Assert.That(cpu.Registers[Register.L], Is.EqualTo(0xFF));
+
+                    break;
+
+                case RegisterPair.SP:
+                    Assert.That(cpu.Sp, Is.EqualTo(0xAAFF));
+                    break;
+            }
+        }
+    }
 }

@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using static CPU.CPUHelper;
 
 namespace CPU.Tests
@@ -8,12 +7,10 @@ namespace CPU.Tests
     [TestFixture]
     public class HelperTests
     {
-
-
         [Test]
         public void CPUHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
-            var cpu = new Cpu {Flags = new byte()};
+            var cpu = new Cpu { Flags = new byte() };
             cpu.SetFlags(1, FlagConstructor("CPAZS"), cpu);
 
             //Check that carry is set
@@ -40,14 +37,15 @@ namespace CPU.Tests
             //Check that the correct flags are set
             //(sign is set, rest unset)
             Assert.That(cpu.Flags, Is.EqualTo(FlagSelector.Sign));
-
         }
+
         [Test]
         public void CPUHelperParityCounter_UnevenParity_Return0()
         {
             var parity = ParityCounter(0b00011111);
             Assert.That(parity, Is.Zero);
         }
+
         [Test]
         public void CPUHelperParityCounter_EvenParity_Return1()
         {
@@ -70,6 +68,4 @@ namespace CPU.Tests
             );
         }
     }
-
-
 }

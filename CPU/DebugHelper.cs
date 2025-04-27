@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 namespace CPU
 {
-
     /// <summary>
     ///     A helper class for debugging
     /// </summary>
@@ -25,9 +24,7 @@ namespace CPU
         {
             Console.Error.WriteLine($"Failed with error code {err}");
             Console.Error.WriteLine(msg);
-            Environment.Exit((int) err);
-            
+            Environment.Exit((int)err);
         }
     }
-
 }

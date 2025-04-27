@@ -7,25 +7,53 @@ using static CPU.DebugHelper;
 
 namespace CPU
 {
-
-
     /// <summary>
     ///     Holds all the possible instructions
     /// </summary>
     public static class Instructions
     {
-
         internal static void Nop(Cpu cpu)
         {
             DebugPrint("NOP", cpu);
         }
 
-        internal static void Lxi(Cpu cpu, int registerPair, int immediate)
+        internal static void Lxi(Cpu cpu, int registerPair, ushort immediate)
         {
+            DebugPrint("LXI", cpu, "huutista");
+            Debug.WriteLine(registerPair);
+            Debug.WriteLine(immediate);
 
-            DebugPrint("LXI", cpu);
-            
-            throw new NotImplementedException("Unimplemented LXI");
+            var mostSignificant = (byte)(immediate & 0x00FF);
+            var leastSignificant = (byte)((immediate & 0xFF00) >> 8);
+
+            switch (registerPair)
+            {
+                case RegisterPair.B:
+                    cpu.Registers[Register.B] = mostSignificant;
+                    cpu.Registers[Register.C] = leastSignificant;
+                    break;
+
+                case RegisterPair.D:
+                    cpu.Registers[Register.D] = mostSignificant;
+                    cpu.Registers[Register.E] = leastSignificant;
+                    break;
+
+                case RegisterPair.H:
+                    cpu.Registers[Register.H] = mostSignificant;
+                    cpu.Registers[Register.L] = leastSignificant;
+                    break;
+
+                case RegisterPair.SP:
+                    //Swap the endianness of the two bytes
+                    var immediateArray = BitConverter.GetBytes(immediate);
+                    Array.Reverse(immediateArray);
+
+                    cpu.Sp = BitConverter.ToUInt16(immediateArray, 0);
+                    break;
+            }
+
+            //increment pc by two because the next two bytes are immediate data for this instruction
+            cpu.Pc += 2;
         }
 
         internal static void Stax(Cpu cpu, int registerPair)
@@ -47,35 +75,30 @@ namespace CPU
             DebugPrint("INR", cpu);
 
             int oldValue;
-            
+
             if (register != Register.MRef)
                 //Set the working int as the register in question
                 oldValue = cpu.Registers[register];
             else
                 //Set the working int as the memory reference
                 oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
-            
-            int newValue = oldValue + 1;
 
-            
+            var newValue = oldValue + 1;
+
+
             SetSign(cpu, newValue);
 
             SetZero(cpu, newValue);
-            
+
             SetParity(cpu, newValue);
-            
+
             SetAux(cpu, newValue, oldValue);
 
 
             if (register != Register.MRef)
-            {
-                cpu.Registers[register] = (byte) (newValue & 0xFF);
-            }
+                cpu.Registers[register] = (byte)(newValue & 0xFF);
             else
-            {
-                cpu.Memory[cpu.Registers[register]] = (byte) (newValue & 0xFF);
-            }
-            
+                cpu.Memory[cpu.Registers[register]] = (byte)(newValue & 0xFF);
         }
 
         internal static void Dcr(Cpu cpu, int register)
@@ -83,41 +106,38 @@ namespace CPU
             DebugPrint("DCR", cpu);
 
             int oldValue;
-            
+
             if (register != Register.MRef)
                 //Set the working int as the register in question
                 oldValue = cpu.Registers[register];
             else
                 //Set the working int as the memory reference
                 oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
-            
-            
-            int newValue = oldValue - 1;
 
-            
+
+            var newValue = oldValue - 1;
+
+
             SetSign(cpu, newValue);
 
             SetZero(cpu, newValue);
-            
+
             SetParity(cpu, newValue);
-            
+
             SetAux(cpu, newValue, oldValue);
 
 
             if (register != Register.MRef)
-            {
-                cpu.Registers[register] = (byte) (newValue & 0xFF);
-            }
+                cpu.Registers[register] = (byte)(newValue & 0xFF);
             else
-            {
-                cpu.Memory[cpu.Registers[register]] = (byte) (newValue & 0xFF);
-            }        }
+                cpu.Memory[cpu.Registers[register]] = (byte)(newValue & 0xFF);
+        }
 
         internal static void Mvi(Cpu cpu, int register)
         {
             DebugPrint("MVI", cpu);
-            byte bitmask = (1 << 8) -1; //black magic bit fuckery to get the immediate data from the opcode
-            byte immediate_data = (byte) (cpu.OpCodeByte & bitmask);
+            byte bitmask = (1 << 8) - 1; //black magic bit fuckery to get the immediate data from the opcode
+            var immediate_data = (byte)(cpu.OpCodeByte & bitmask);
             Console.WriteLine(Convert.ToString(immediate_data, 2).PadLeft(8, '0'));
             throw new NotImplementedException("Unimplemented MVI");
         }
@@ -200,7 +220,7 @@ namespace CPU
         internal static void Cma(Cpu cpu)
         {
             DebugPrint("CMA", cpu);
-            cpu.Registers[Register.A] = (byte) ~cpu.Registers[Register.A];
+            cpu.Registers[Register.A] = (byte)~cpu.Registers[Register.A];
         }
 
         internal static void Rnz(Cpu cpu)
@@ -215,7 +235,6 @@ namespace CPU
             DebugPrint("RNC", cpu);
 
             throw new NotImplementedException("Unimplemented RNC");
-
         }
 
         internal static void Rpo(Cpu cpu)
@@ -223,7 +242,6 @@ namespace CPU
             DebugPrint("RPO", cpu);
 
             throw new NotImplementedException("Unimplemented RPO");
-
         }
 
         internal static void Rp(Cpu cpu)
@@ -231,7 +249,6 @@ namespace CPU
             DebugPrint("RP", cpu);
 
             throw new NotImplementedException("Unimplemented RP");
-
         }
 
         internal static void Hlt(Cpu cpu)
@@ -239,7 +256,6 @@ namespace CPU
             DebugPrint("HLT", cpu);
 
             throw new NotImplementedException("Unimplemented HLT");
-
         }
 
         internal static void Mov(Cpu cpu, int src, int dst)
@@ -247,7 +263,6 @@ namespace CPU
             DebugPrint("MOV", cpu);
 
             cpu.Registers[dst] = cpu.Registers[src];
-
         }
 
         internal static void Add(Cpu cpu, int register)
@@ -273,14 +288,14 @@ namespace CPU
             SetSign(cpu, newAccumulator);
 
             SetZero(cpu, newAccumulator);
-            
+
             SetParity(cpu, newAccumulator);
-            
+
             SetAux(cpu, oldAccumulator, addToAccumulator);
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
         internal static void Adc(Cpu cpu, int register)
@@ -298,14 +313,14 @@ namespace CPU
                 //Set the working int as the memory reference
                 addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
 
-            
+
             var newAccumulator = addToAccumulator + oldAccumulator + (cpu.Flags & FlagSelector.Carry);
 
 
             SetCarry(cpu, newAccumulator);
 
             SetSign(cpu, newAccumulator);
-            
+
             SetZero(cpu, newAccumulator);
 
             SetParity(cpu, newAccumulator);
@@ -313,14 +328,13 @@ namespace CPU
             SetAux(cpu, oldAccumulator, addToAccumulator);
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
-
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
-        
+
         internal static void Sub(Cpu cpu, int register)
         {
             DebugPrint("SUB", cpu);
-            
+
             int subtrahend;
             int minuend = cpu.Registers[Register.A];
 
@@ -332,9 +346,9 @@ namespace CPU
                 subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
-            
+
             var newAccumulator = minuend + twosComplementSubtrahend;
-            
+
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
@@ -342,17 +356,17 @@ namespace CPU
             //Set/unset the aux carry flag
             //TODO I'm note 100% sure my understanding of aux carry is right here
             SetAux(cpu, minuend, twosComplementSubtrahend);
-            
+
             SetSign(cpu, newAccumulator);
-            
+
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
         internal static void Sbb(Cpu cpu, int register)
         {
             DebugPrint("SBB", cpu);
-            
+
             int subtrahend;
             int minuend = cpu.Registers[Register.A];
 
@@ -364,71 +378,68 @@ namespace CPU
                 subtrahend = cpu.Memory[cpu.Registers[Register.MRef]] + (cpu.Flags & FlagSelector.Carry);
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
-            
+
             var newAccumulator = minuend + twosComplementSubtrahend;
 
-            SetCarry(cpu,newAccumulator);
+            SetCarry(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
             SetAux(cpu, minuend, subtrahend);
             SetSign(cpu, newAccumulator);
 
 
-
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
-
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
         internal static void Ana(Cpu cpu, int register)
         {
             DebugPrint("ANA", cpu);
 
-            int newAccumulator = cpu.Registers[Register.A] & cpu.Registers[register];
+            var newAccumulator = cpu.Registers[Register.A] & cpu.Registers[register];
 
             SetCarry(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetSign(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
-            
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
+
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
         internal static void Xra(Cpu cpu, int register)
         {
             DebugPrint("XRA", cpu);
-            
-            int newAccumulator = cpu.Registers[Register.A] ^ cpu.Registers[register];
-            
+
+            var newAccumulator = cpu.Registers[Register.A] ^ cpu.Registers[register];
+
             SetCarry(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetSign(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
             SetAux(cpu, newAccumulator, cpu.Registers[register]);
-            
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
 
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
         internal static void Ora(Cpu cpu, int register)
         {
             DebugPrint("ORA", cpu);
-            
-            int newAccumulator = cpu.Registers[Register.A] | cpu.Registers[register];
+
+            var newAccumulator = cpu.Registers[Register.A] | cpu.Registers[register];
 
             SetCarry(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetSign(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
-            
-            cpu.Registers[Register.A] = (byte) (newAccumulator & 0xFF);
+
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
 
         internal static void Cmp(Cpu cpu, int register)
         {
             DebugPrint("CMP", cpu);
-            
+
             int subtrahend;
             int minuend = cpu.Registers[Register.A];
 
@@ -440,34 +451,31 @@ namespace CPU
                 subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
-            
+
             var newAccumulator = minuend + twosComplementSubtrahend;
-            
+
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
 
             //Set/unset the aux carry flag
             SetAux(cpu, minuend, twosComplementSubtrahend);
-            
+
             SetSign(cpu, newAccumulator);
-            
-            }
+        }
 
 
         internal static void Stc(Cpu cpu)
         {
             DebugPrint("STC", cpu);
-            
-            cpu.SetFlags(1, FlagSelector.Carry, cpu);
 
+            cpu.SetFlags(1, FlagSelector.Carry, cpu);
         }
 
         internal static void Sbi(Cpu cpu)
         {
             DebugPrint("SBI", cpu);
-            
-            
+
 
             throw new NotImplementedException("Unimplemented SBI");
         }
@@ -539,8 +547,8 @@ namespace CPU
         internal static void Jmp(Cpu cpu)
         {
             DebugPrint("JMP", cpu);
-            
-            
+
+
             //throw new NotImplementedException("Unimplemented JMP");
         }
 
@@ -589,9 +597,8 @@ namespace CPU
         internal static void Cmc(Cpu cpu)
         {
             DebugPrint("CMC", cpu);
-            
-            cpu.SetFlags(~(cpu.Flags & FlagSelector.Carry), FlagSelector.Carry, cpu);
 
+            cpu.SetFlags(~(cpu.Flags & FlagSelector.Carry), FlagSelector.Carry, cpu);
         }
 
         internal static void Pop(Cpu cpu, int registerPair)
@@ -605,10 +612,11 @@ namespace CPU
         {
             DebugPrint("XCHG", cpu);
 
-            (cpu.Registers[Register.H], cpu.Registers[Register.D]) = (cpu.Registers[Register.D], cpu.Registers[Register.H]);
+            (cpu.Registers[Register.H], cpu.Registers[Register.D]) =
+                (cpu.Registers[Register.D], cpu.Registers[Register.H]);
 
-            (cpu.Registers[Register.L], cpu.Registers[Register.E]) = (cpu.Registers[Register.E], cpu.Registers[Register.L]);
-
+            (cpu.Registers[Register.L], cpu.Registers[Register.E]) =
+                (cpu.Registers[Register.E], cpu.Registers[Register.L]);
         }
 
         internal static void Xthl(Cpu cpu)
