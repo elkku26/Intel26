@@ -17,10 +17,12 @@ namespace CPU
             DebugPrint("NOP", cpu);
         }
 
-        internal static void Lxi(Cpu cpu, int registerPair, ushort immediate)
+        internal static void Lxi(Cpu cpu, int registerPair)
         {
             DebugPrint("LXI", cpu, "huutista");
             Debug.WriteLine(registerPair);
+
+            ushort immediate = BitConverter.ToUInt16(cpu.Memory, (int) cpu.Pc+1);
             Debug.WriteLine(immediate);
 
             var mostSignificant = (byte)(immediate & 0x00FF);

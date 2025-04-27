@@ -159,8 +159,8 @@ namespace CPU
 
                         // 0x01
                         case 0x1:
-
-                            Instructions.Lxi(this, RegisterPair.B, Memory[Pc + 1]);
+                            
+                            Instructions.Lxi(this, RegisterPair.B);
 
                             break;
 
@@ -278,7 +278,7 @@ namespace CPU
                         // 0x11
                         case 0x1:
 
-                            //Instructions.Lxi(this, RegisterPair.D);
+                            Instructions.Lxi(this, RegisterPair.D);
 
                             break;
 
@@ -396,7 +396,7 @@ namespace CPU
                         // 0x21
                         case 0x1:
 
-                            //Instructions.Lxi(this, RegisterPair.H);
+                            Instructions.Lxi(this, RegisterPair.H);
 
                             break;
 
@@ -514,7 +514,7 @@ namespace CPU
                         // 0x31
                         case 0x1:
 
-                            //Instructions.Lxi(this, RegisterPair.SP);
+                            Instructions.Lxi(this, RegisterPair.SP);
 
                             break;
 

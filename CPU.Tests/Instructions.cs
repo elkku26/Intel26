@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.ComponentModel;
+using NUnit.Framework;
 using static CPU.CPUHelper;
 
 namespace CPU.Tests
@@ -93,8 +95,8 @@ namespace CPU.Tests
         [TestCase(RegisterPair.SP, (ushort)0xFFAA)]
         public void InstructionLXI(int registerPair, ushort immediate)
         {
-            var cpu = new Cpu();
-            Instructions.Lxi(cpu, registerPair, immediate);
+            var cpu = new Cpu{Memory = { [1] = BitConverter.GetBytes(immediate)[0], [2] = BitConverter.GetBytes(immediate)[1]}};
+            Instructions.Lxi(cpu, registerPair);
 
             switch (registerPair)
             {
