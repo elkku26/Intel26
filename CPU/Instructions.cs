@@ -20,8 +20,7 @@ namespace CPU
 
         internal static void Lxi(Cpu cpu, int registerPair)
         {
-
-            ushort immediate = BitConverter.ToUInt16(cpu.Memory, (int) cpu.Pc+1);
+            var immediate = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
 
             var mostSignificant = (byte)(immediate & 0x00FF);
             var leastSignificant = (byte)((immediate & 0xFF00) >> 8);
@@ -48,7 +47,7 @@ namespace CPU
                     var immediateArray = BitConverter.GetBytes(immediate);
                     Array.Reverse(immediateArray);
 
-                    cpu.Sp = BitConverter.ToUInt16(immediateArray, 0);
+                    cpu.Sp.Push(BitConverter.ToUInt16(immediateArray, 0));
                     break;
             }
 
@@ -135,14 +134,10 @@ namespace CPU
 
         internal static void Mvi(Cpu cpu, int register)
         {
+            if (register == Register.MRef) throw new NotImplementedException("mref is not yet properly implemented!!");
 
-            if (register == Register.MRef)
-            {
-                throw new NotImplementedException("mref is not yet properly implemented!!");
-            }
-            
             DebugPrint("MVI", cpu);
-            byte immediate = cpu.Memory[cpu.Pc +1];
+            var immediate = cpu.Memory[cpu.Pc + 1];
             cpu.Registers[register] = immediate;
             cpu.Pc++;
         }
@@ -313,13 +308,13 @@ namespace CPU
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                addToAccumulator = cpu.Registers[register]+ (cpu.Flags & FlagSelector.Carry);
+                addToAccumulator = cpu.Registers[register] + (cpu.Flags & FlagSelector.Carry);
             else
                 //Set the working int as the memory reference
-                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]]+ (cpu.Flags & FlagSelector.Carry);
+                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]] + (cpu.Flags & FlagSelector.Carry);
 
 
-            var newAccumulator = addToAccumulator + oldAccumulator ;
+            var newAccumulator = addToAccumulator + oldAccumulator;
 
 
             SetCarry(cpu, newAccumulator);
@@ -330,7 +325,7 @@ namespace CPU
 
             SetParity(cpu, newAccumulator);
 
-            
+
             SetAux(cpu, oldAccumulator, addToAccumulator);
 
             //Set the accumulator to its new value
@@ -353,7 +348,7 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
-            var newAccumulator = minuend -subtrahend;
+            var newAccumulator = minuend - subtrahend;
 
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
@@ -497,9 +492,9 @@ namespace CPU
         {
             DebugPrint("SUI", cpu);
 
-            int subtrahend = cpu.Memory[cpu.Pc+1];
+            int subtrahend = cpu.Memory[cpu.Pc + 1];
             int minuend = cpu.Registers[Register.A];
-            
+
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
@@ -525,7 +520,7 @@ namespace CPU
         {
             DebugPrint("ACI", cpu);
 
-            int addToAccumulator = cpu.Memory[cpu.Pc+1] + (cpu.Flags & FlagSelector.Carry);
+            var addToAccumulator = cpu.Memory[cpu.Pc + 1] + (cpu.Flags & FlagSelector.Carry);
             int oldAccumulator = cpu.Registers[Register.A];
 
             var newAccumulator = addToAccumulator + oldAccumulator;
@@ -549,8 +544,8 @@ namespace CPU
         internal static void Adi(Cpu cpu)
         {
             DebugPrint("ADI", cpu);
-            
-            int addToAccumulator = cpu.Memory[cpu.Pc+1];
+
+            int addToAccumulator = cpu.Memory[cpu.Pc + 1];
             int oldAccumulator = cpu.Registers[Register.A];
 
             var newAccumulator = addToAccumulator + oldAccumulator;
@@ -598,9 +593,9 @@ namespace CPU
 
             if ((cpu.Flags & FlagSelector.Carry) == 0)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
 
-                cpu.Pc = (uint) address-1;
+                cpu.Pc = (uint)address - 1;
             }
         }
 
@@ -609,9 +604,9 @@ namespace CPU
             DebugPrint("JNZ", cpu);
             if ((cpu.Flags & FlagSelector.Zero) == 0)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
 
-                cpu.Pc = (uint) address-1;
+                cpu.Pc = (uint)address - 1;
             }
         }
 
@@ -621,10 +616,10 @@ namespace CPU
             DebugPrint("JMP", cpu);
             Console.WriteLine("opcode:" + Convert.ToString(cpu.Memory[cpu.Pc], 2).PadLeft(8, '0'));
 
-            var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+            var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
             //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            cpu.Pc = (uint) address-1;
+            cpu.Pc = (uint)address - 1;
         }
 
         internal static void Jz(Cpu cpu)
@@ -632,12 +627,11 @@ namespace CPU
             DebugPrint("JZ", cpu);
             if ((cpu.Flags & FlagSelector.Zero) == 1)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address-1; //addressEndianCorrected;
+                cpu.Pc = (uint)address - 1; //addressEndianCorrected;
             }
-            
         }
 
         internal static void Jc(Cpu cpu)
@@ -646,10 +640,10 @@ namespace CPU
 
             if ((cpu.Flags & FlagSelector.Carry) == 1)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address - 1;
+                cpu.Pc = (uint)address - 1;
             }
         }
 
@@ -658,10 +652,10 @@ namespace CPU
             DebugPrint("JPO", cpu);
             if ((cpu.Flags & FlagSelector.Parity) == 0)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address-1; // addressEndianCorrected;
+                cpu.Pc = (uint)address - 1; // addressEndianCorrected;
             }
         }
 
@@ -671,22 +665,23 @@ namespace CPU
 
             if ((cpu.Flags & FlagSelector.Carry) == 1)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address -1;
-            }        }
+                cpu.Pc = (uint)address - 1;
+            }
+        }
 
         internal static void Jp(Cpu cpu)
         {
             DebugPrint("JP", cpu);
-            
+
             if ((cpu.Flags & FlagSelector.Parity) == 1)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address - 1;
+                cpu.Pc = (uint)address - 1;
             }
         }
 
@@ -696,11 +691,11 @@ namespace CPU
 
             if ((cpu.Flags & FlagSelector.Sign) == 1)
             {
-                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
                 //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = (uint) address - 1; //addressEndianCorrected;
-            }        
+                cpu.Pc = (uint)address - 1; //addressEndianCorrected;
+            }
         }
 
         internal static void Cmc(Cpu cpu)
@@ -761,98 +756,147 @@ namespace CPU
         {
             DebugPrint("CALL", cpu);
 
-            throw new NotImplementedException("Unimplemented CALL");
+            var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+
+            cpu.Sp.Push((ushort)(cpu.Pc + 3));
+            cpu.Pc = address;
         }
 
         internal static void Cnz(Cpu cpu)
         {
             DebugPrint("CNZ", cpu);
 
-            throw new NotImplementedException("Unimplemented CNZ");
+            if ((cpu.Flags & FlagSelector.Zero) == 1)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cz(Cpu cpu)
         {
             DebugPrint("CZ", cpu);
-
-            throw new NotImplementedException("Unimplemented CZ");
+            if ((cpu.Flags & FlagSelector.Zero) == 0)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cnc(Cpu cpu)
         {
             DebugPrint("CNC", cpu);
 
-            throw new NotImplementedException("Unimplemented CNC");
+            if ((cpu.Flags & FlagSelector.Carry) == 0)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cc(Cpu cpu)
         {
-            DebugPrint("CC", cpu);
-
-            throw new NotImplementedException("Unimplemented CC");
+            if ((cpu.Flags & FlagSelector.Carry) == 1)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cpo(Cpu cpu)
         {
             DebugPrint("CPO", cpu);
 
-            throw new NotImplementedException("Unimplemented CPO");
+            if ((cpu.Flags & FlagSelector.Parity) == 0)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cpe(Cpu cpu)
         {
             DebugPrint("CPE", cpu);
 
-            throw new NotImplementedException("Unimplemented CPE");
+            if ((cpu.Flags & FlagSelector.Parity) == 1)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cp(Cpu cpu)
         {
             DebugPrint("CP", cpu);
 
-            throw new NotImplementedException("Unimplemented CP");
+            if ((cpu.Flags & FlagSelector.Sign) == 0)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Cm(Cpu cpu)
         {
             DebugPrint("CM", cpu);
 
-            throw new NotImplementedException("Unimplemented CM");
+            if ((cpu.Flags & FlagSelector.Sign) == 1)
+            {
+                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                cpu.Sp.Push((ushort)(cpu.Pc + 3));
+                cpu.Pc = address;
+            }
         }
 
         internal static void Ret(Cpu cpu)
         {
             DebugPrint("RET", cpu);
-
-            throw new NotImplementedException("Unimplemented RET");
+            //we compensate for the automatic PC increment here, NOT when we push the pointer to the stack
+            cpu.Pc = (uint)cpu.Sp.Pop() - 1;
         }
 
         internal static void Rz(Cpu cpu)
         {
             DebugPrint("RZ", cpu);
-
-            throw new NotImplementedException("Unimplemented RZ");
+            if ((cpu.Flags & FlagSelector.Zero) == 1)
+            {
+                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
+            }
         }
 
         internal static void Rc(Cpu cpu)
         {
             DebugPrint("RC", cpu);
-
-            throw new NotImplementedException("Unimplemented RC");
+            if ((cpu.Flags & FlagSelector.Carry) == 1)
+            {
+                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
+            }
         }
 
         internal static void Rpe(Cpu cpu)
         {
             DebugPrint("RPE", cpu);
 
-            throw new NotImplementedException("Unimplemented RPE");
+            if ((cpu.Flags & FlagSelector.Parity) == 1)
+            {
+                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
+            }
         }
 
         internal static void Rm(Cpu cpu)
         {
             DebugPrint("RM", cpu);
-
-            throw new NotImplementedException("Unimplemented RM");
+            if ((cpu.Flags & FlagSelector.Sign) == 1)
+            {
+                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
+            }
         }
 
         internal static void Ei(Cpu cpu)

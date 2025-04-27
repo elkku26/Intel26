@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using static CPU.DebugHelper;
@@ -82,7 +83,7 @@ namespace CPU
         public byte OpCodeByte;
         public uint Pc;
         public byte[] Registers;
-        public ushort Sp;
+        public Stack<ushort> Sp;
 
         /// <summary>
         ///     Constructor for the CPU Class
@@ -95,7 +96,7 @@ namespace CPU
             Memory = new byte[64000];
             Registers = new byte[8];
             Pc = 0;
-            Sp = 0;
+            Sp = new Stack<ushort>();
         }
 
         /// <summary>
@@ -159,7 +160,7 @@ namespace CPU
 
                         // 0x01
                         case 0x1:
-                            
+
                             Instructions.Lxi(this, RegisterPair.B);
 
                             break;

@@ -95,7 +95,8 @@ namespace CPU.Tests
         [TestCase(RegisterPair.SP, (ushort)0xFFAA)]
         public void InstructionLXI(int registerPair, ushort immediate)
         {
-            var cpu = new Cpu{Memory = { [1] = BitConverter.GetBytes(immediate)[0], [2] = BitConverter.GetBytes(immediate)[1]}};
+            var cpu = new Cpu
+                { Memory = { [1] = BitConverter.GetBytes(immediate)[0], [2] = BitConverter.GetBytes(immediate)[1] } };
             Instructions.Lxi(cpu, registerPair);
 
             switch (registerPair)
@@ -122,22 +123,19 @@ namespace CPU.Tests
                     break;
             }
         }
-        
+
         [TestCase(Register.A, 0xFA)]
         [TestCase(Register.B, 0xFA)]
         [TestCase(Register.C, 0xFA)]
         [TestCase(Register.D, 0xFA)]
         [TestCase(Register.E, 0xFA)]
         [TestCase(Register.MRef, 0xFA)]
-
         public void InstructionMVI(int register, byte immediate)
         {
-            var cpu = new Cpu{Memory = { [1] = immediate }};
+            var cpu = new Cpu { Memory = { [1] = immediate } };
             Instructions.Mvi(cpu, register);
-            
+
             Assert.That(cpu.Registers[register], Is.EqualTo(immediate));
-
         }
-
     }
 }
