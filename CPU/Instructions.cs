@@ -508,8 +508,26 @@ namespace CPU
         internal static void Adi(Cpu cpu)
         {
             DebugPrint("ADI", cpu);
+            
+            int addToAccumulator = cpu.Memory[cpu.Pc+1];
+            int oldAccumulator = cpu.Registers[Register.A];
 
-            throw new NotImplementedException("Unimplemented ACI");
+            var newAccumulator = addToAccumulator + oldAccumulator;
+
+            SetCarry(cpu, newAccumulator);
+
+            SetSign(cpu, newAccumulator);
+
+            SetZero(cpu, newAccumulator);
+
+            SetParity(cpu, newAccumulator);
+
+            SetAux(cpu, oldAccumulator, addToAccumulator);
+
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+
+            //increment pc to not interpret immediate data as opcode
+            cpu.Pc++;
         }
 
         internal static void Xri(Cpu cpu)
