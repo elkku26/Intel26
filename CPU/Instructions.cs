@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using static CPU.CPUHelper;
 using static CPU.DebugHelper;
@@ -352,7 +353,7 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
-            var newAccumulator = minuend + twosComplementSubtrahend;
+            var newAccumulator = minuend -subtrahend;
 
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
@@ -384,12 +385,12 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
-            var newAccumulator = minuend + twosComplementSubtrahend;
+            var newAccumulator = minuend - subtrahend;
 
             SetCarry(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
             SetParity(cpu, newAccumulator);
-            SetAux(cpu, minuend, subtrahend);
+            SetAux(cpu, minuend, twosComplementSubtrahend);
             SetSign(cpu, newAccumulator);
 
 
@@ -457,7 +458,7 @@ namespace CPU
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
-            var newAccumulator = minuend + twosComplementSubtrahend;
+            var newAccumulator = minuend - subtrahend;
 
             SetBorrow(cpu, newAccumulator);
             SetZero(cpu, newAccumulator);
@@ -496,7 +497,28 @@ namespace CPU
         {
             DebugPrint("SUI", cpu);
 
-            throw new NotImplementedException("Unimplemented SUI");
+            int subtrahend = cpu.Memory[cpu.Pc+1];
+            int minuend = cpu.Registers[Register.A];
+            
+
+            int twosComplementSubtrahend = GetTwosComplement(subtrahend);
+
+            var newAccumulator = minuend - subtrahend;
+
+            SetBorrow(cpu, newAccumulator);
+            SetZero(cpu, newAccumulator);
+            SetParity(cpu, newAccumulator);
+
+            //Set/unset the aux carry flag
+            //TODO I'm note 100% sure my understanding of aux carry is right here
+            SetAux(cpu, minuend, twosComplementSubtrahend);
+
+            SetSign(cpu, newAccumulator);
+
+            //Set the accumulator to its new value
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+
+            cpu.Pc++;
         }
 
         internal static void Aci(Cpu cpu)
@@ -574,65 +596,113 @@ namespace CPU
         {
             DebugPrint("JNC", cpu);
 
-            throw new NotImplementedException("Unimplemented JNC");
+            if ((cpu.Flags & FlagSelector.Carry) == 0)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+
+                cpu.Pc = addressEndianCorrected;
+            }
         }
 
         internal static void Jnz(Cpu cpu)
         {
             DebugPrint("JNZ", cpu);
+            if ((cpu.Flags & FlagSelector.Zero) == 0)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            throw new NotImplementedException("Unimplemented JNZ");
+                cpu.Pc = addressEndianCorrected;
+            }
         }
 
 
         internal static void Jmp(Cpu cpu)
         {
             DebugPrint("JMP", cpu);
+            Console.WriteLine("opcode:" + Convert.ToString(cpu.Memory[cpu.Pc], 2).PadLeft(8, '0'));
 
+            var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+            var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            //throw new NotImplementedException("Unimplemented JMP");
+            cpu.Pc = addressEndianCorrected;
         }
 
         internal static void Jz(Cpu cpu)
         {
             DebugPrint("JZ", cpu);
+            if ((cpu.Flags & FlagSelector.Zero) == 1)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            throw new NotImplementedException("Unimplemented JZ");
+                cpu.Pc = addressEndianCorrected;
+            }
+            
         }
 
         internal static void Jc(Cpu cpu)
         {
             DebugPrint("JC", cpu);
 
-            throw new NotImplementedException("Unimplemented JC");
+            if ((cpu.Flags & FlagSelector.Carry) == 1)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+
+                cpu.Pc = addressEndianCorrected;
+            }
         }
 
         internal static void Jpo(Cpu cpu)
         {
             DebugPrint("JPO", cpu);
+            if ((cpu.Flags & FlagSelector.Parity) == 0)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            throw new NotImplementedException("Unimplemented JPO");
+                cpu.Pc = addressEndianCorrected;
+            }
         }
 
         internal static void Jpe(Cpu cpu)
         {
             DebugPrint("JPE", cpu);
 
-            throw new NotImplementedException("Unimplemented JPE");
-        }
+            if ((cpu.Flags & FlagSelector.Carry) == 1)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+
+                cpu.Pc = addressEndianCorrected;
+            }        }
 
         internal static void Jp(Cpu cpu)
         {
             DebugPrint("JP", cpu);
+            
+            if ((cpu.Flags & FlagSelector.Parity) == 1)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            throw new NotImplementedException("Unimplemented JP");
+                cpu.Pc = addressEndianCorrected;
+            }
         }
 
         internal static void Jm(Cpu cpu)
         {
             DebugPrint("JM", cpu);
 
-            throw new NotImplementedException("Unimplemented JM");
+            if ((cpu.Flags & FlagSelector.Sign) == 1)
+            {
+                var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+
+                cpu.Pc = addressEndianCorrected;
+            }        
         }
 
         internal static void Cmc(Cpu cpu)
