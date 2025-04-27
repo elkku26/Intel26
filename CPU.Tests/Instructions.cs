@@ -122,5 +122,18 @@ namespace CPU.Tests
                     break;
             }
         }
+        
+        [TestCase(RegisterPair.B, 0xFA)]
+        [TestCase(RegisterPair.D, 0xFA)]
+        [TestCase(RegisterPair.H, 0xFA)]
+        [TestCase(RegisterPair.SP, 0xFA)]
+        public void InstructionMVI(int register, byte immediate)
+        {
+            var cpu = new Cpu{Memory = { [1] = immediate }};
+            Instructions.Mvi(cpu, register);
+            
+            Assert.That(cpu.Registers[register], Is.EqualTo(immediate));
+
+        }
     }
 }

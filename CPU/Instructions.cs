@@ -19,11 +19,8 @@ namespace CPU
 
         internal static void Lxi(Cpu cpu, int registerPair)
         {
-            DebugPrint("LXI", cpu, "huutista");
-            Debug.WriteLine(registerPair);
 
             ushort immediate = BitConverter.ToUInt16(cpu.Memory, (int) cpu.Pc+1);
-            Debug.WriteLine(immediate);
 
             var mostSignificant = (byte)(immediate & 0x00FF);
             var leastSignificant = (byte)((immediate & 0xFF00) >> 8);
@@ -137,11 +134,16 @@ namespace CPU
 
         internal static void Mvi(Cpu cpu, int register)
         {
+
+            if (register == Register.MRef)
+            {
+                throw new NotImplementedException("mref is not yet properly implemented!!");
+            }
+            
             DebugPrint("MVI", cpu);
-            byte bitmask = (1 << 8) - 1; //black magic bit fuckery to get the immediate data from the opcode
-            var immediate_data = (byte)(cpu.OpCodeByte & bitmask);
-            Console.WriteLine(Convert.ToString(immediate_data, 2).PadLeft(8, '0'));
-            throw new NotImplementedException("Unimplemented MVI");
+            byte immediate = cpu.Memory[cpu.Pc +1];
+            cpu.Registers[register] = immediate;
+            cpu.Pc++;
         }
 
         internal static void Rlc(Cpu cpu)
