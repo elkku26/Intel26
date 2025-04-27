@@ -599,9 +599,8 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Carry) == 0)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address-1;
             }
         }
 
@@ -611,9 +610,8 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Zero) == 0)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address-1;
             }
         }
 
@@ -624,9 +622,9 @@ namespace CPU
             Console.WriteLine("opcode:" + Convert.ToString(cpu.Memory[cpu.Pc], 2).PadLeft(8, '0'));
 
             var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-            var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+            //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-            cpu.Pc = addressEndianCorrected;
+            cpu.Pc = (uint) address-1;
         }
 
         internal static void Jz(Cpu cpu)
@@ -635,9 +633,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Zero) == 1)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address-1; //addressEndianCorrected;
             }
             
         }
@@ -649,9 +647,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Carry) == 1)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address - 1;
             }
         }
 
@@ -661,9 +659,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Parity) == 0)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address-1; // addressEndianCorrected;
             }
         }
 
@@ -674,9 +672,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Carry) == 1)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address -1;
             }        }
 
         internal static void Jp(Cpu cpu)
@@ -686,9 +684,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Parity) == 1)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address - 1;
             }
         }
 
@@ -699,9 +697,9 @@ namespace CPU
             if ((cpu.Flags & FlagSelector.Sign) == 1)
             {
                 var address = System.BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
+                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
 
-                cpu.Pc = addressEndianCorrected;
+                cpu.Pc = (uint) address - 1; //addressEndianCorrected;
             }        
         }
 
