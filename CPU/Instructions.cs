@@ -312,13 +312,13 @@ namespace CPU
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                addToAccumulator = cpu.Registers[register];
+                addToAccumulator = cpu.Registers[register]+ (cpu.Flags & FlagSelector.Carry);
             else
                 //Set the working int as the memory reference
-                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
+                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]]+ (cpu.Flags & FlagSelector.Carry);
 
 
-            var newAccumulator = addToAccumulator + oldAccumulator + (cpu.Flags & FlagSelector.Carry);
+            var newAccumulator = addToAccumulator + oldAccumulator ;
 
 
             SetCarry(cpu, newAccumulator);
@@ -329,6 +329,7 @@ namespace CPU
 
             SetParity(cpu, newAccumulator);
 
+            
             SetAux(cpu, oldAccumulator, addToAccumulator);
 
             //Set the accumulator to its new value
@@ -502,7 +503,25 @@ namespace CPU
         {
             DebugPrint("ACI", cpu);
 
-            throw new NotImplementedException("Unimplemented ACI");
+            int addToAccumulator = cpu.Memory[cpu.Pc+1] + (cpu.Flags & FlagSelector.Carry);
+            int oldAccumulator = cpu.Registers[Register.A];
+
+            var newAccumulator = addToAccumulator + oldAccumulator;
+
+            SetCarry(cpu, newAccumulator);
+
+            SetSign(cpu, newAccumulator);
+
+            SetZero(cpu, newAccumulator);
+
+            SetParity(cpu, newAccumulator);
+
+            SetAux(cpu, oldAccumulator, addToAccumulator);
+
+            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+
+            //increment pc to not interpret immediate data as opcode
+            cpu.Pc++;
         }
 
         internal static void Adi(Cpu cpu)
