@@ -123,10 +123,13 @@ namespace CPU.Tests
             }
         }
         
-        [TestCase(RegisterPair.B, 0xFA)]
-        [TestCase(RegisterPair.D, 0xFA)]
-        [TestCase(RegisterPair.H, 0xFA)]
-        [TestCase(RegisterPair.SP, 0xFA)]
+        [TestCase(Register.A, 0xFA)]
+        [TestCase(Register.B, 0xFA)]
+        [TestCase(Register.C, 0xFA)]
+        [TestCase(Register.D, 0xFA)]
+        [TestCase(Register.E, 0xFA)]
+        [TestCase(Register.MRef, 0xFA)]
+
         public void InstructionMVI(int register, byte immediate)
         {
             var cpu = new Cpu{Memory = { [1] = immediate }};
@@ -135,5 +138,6 @@ namespace CPU.Tests
             Assert.That(cpu.Registers[register], Is.EqualTo(immediate));
 
         }
+
     }
 }
