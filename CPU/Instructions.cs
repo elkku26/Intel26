@@ -765,7 +765,7 @@ namespace CPU
         {
             DebugPrint("RET");
             //we compensate for the automatic PC increment here, NOT when we push the pointer to the stack
-            Cpu.Current.Pc = Cpu.Current.Pop();
+            Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
 
         internal static void Rz()
