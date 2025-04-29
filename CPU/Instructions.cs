@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Runtime.InteropServices.ComTypes;
 using static CPU.CPUHelper;
 using static CPU.DebugHelper;
 
@@ -13,938 +14,831 @@ namespace CPU
     /// </summary>
     public static class Instructions
     {
-        internal static void Nop(Cpu cpu)
+        internal static void Nop()
         {
-            DebugPrint("NOP", cpu);
+            DebugPrint("NOP");
         }
 
-        internal static void Lxi(Cpu cpu, int registerPair)
+        internal static void Lxi(int registerPair)
         {
-            var immediate = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-
-            var mostSignificant = (byte)(immediate & 0x00FF);
-            var leastSignificant = (byte)((immediate & 0xFF00) >> 8);
+            var firstByte = Cpu.Current.Memory[Cpu.Current.Pc + 1];
+            var secondByte = Cpu.Current.Memory[Cpu.Current.Pc + 2];
 
             switch (registerPair)
             {
                 case RegisterPair.B:
-                    cpu.Registers[Register.B] = mostSignificant;
-                    cpu.Registers[Register.C] = leastSignificant;
+                    Cpu.Current.Registers[Register.B] = secondByte;
+                    Cpu.Current.Registers[Register.C] = firstByte;
                     break;
 
                 case RegisterPair.D:
-                    cpu.Registers[Register.D] = mostSignificant;
-                    cpu.Registers[Register.E] = leastSignificant;
+                    Cpu.Current.Registers[Register.D] = secondByte;
+                    Cpu.Current.Registers[Register.E] = firstByte;
                     break;
 
                 case RegisterPair.H:
-                    cpu.Registers[Register.H] = mostSignificant;
-                    cpu.Registers[Register.L] = leastSignificant;
+                    Cpu.Current.Registers[Register.H] = secondByte;
+                    Cpu.Current.Registers[Register.L] = firstByte;
                     break;
 
                 case RegisterPair.SP:
-                    //Swap the endianness of the two bytes
-                    var immediateArray = BitConverter.GetBytes(immediate);
-                    Array.Reverse(immediateArray);
-
-                    cpu.Sp.Push(BitConverter.ToUInt16(immediateArray, 0));
+                    Cpu.Current.PushStack(secondByte, firstByte);
                     break;
             }
 
-            //increment pc by two because the next two bytes are immediate data for this instruction
-            cpu.Pc += 2;
+            Cpu.Current.Pc += 2;
         }
 
-        internal static void Stax(Cpu cpu, int registerPair)
+        internal static void Stax(int registerPair)
         {
-            DebugPrint("STAX", cpu);
+            DebugPrint("STAX");
 
             throw new NotImplementedException("Unimplemented STAX");
         }
 
-        internal static void Inx(Cpu cpu, int registerPair)
+        internal static void Inx(int registerPair)
         {
-            DebugPrint("INX", cpu);
+            DebugPrint("INX");
 
             throw new NotImplementedException("Unimplemented INX");
         }
 
-        internal static void Inr(Cpu cpu, int register)
+        internal static void Inr(int register)
         {
-            DebugPrint("INR", cpu);
+            DebugPrint("INR");
 
             int oldValue;
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                oldValue = cpu.Registers[register];
+                oldValue = Cpu.Current.Registers[register];
             else
                 //Set the working int as the memory reference
-                oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
+                oldValue = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]];
 
             var newValue = oldValue + 1;
 
 
-            SetSign(cpu, newValue);
+            SetSign(newValue);
 
-            SetZero(cpu, newValue);
+            SetZero(newValue);
 
-            SetParity(cpu, newValue);
+            SetParity(newValue);
 
-            SetAux(cpu, newValue, oldValue);
+            SetAux(newValue, oldValue);
 
 
             if (register != Register.MRef)
-                cpu.Registers[register] = (byte)(newValue & 0xFF);
+                Cpu.Current.Registers[register] = (byte)(newValue & 0xFF);
             else
-                cpu.Memory[cpu.Registers[register]] = (byte)(newValue & 0xFF);
+                Cpu.Current.Memory[Cpu.Current.Registers[register]] = (byte)(newValue & 0xFF);
         }
 
-        internal static void Dcr(Cpu cpu, int register)
+        internal static void Dcr(int register)
         {
-            DebugPrint("DCR", cpu);
+            DebugPrint("DCR");
 
             int oldValue;
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                oldValue = cpu.Registers[register];
+                oldValue = Cpu.Current.Registers[register];
             else
                 //Set the working int as the memory reference
-                oldValue = cpu.Memory[cpu.Registers[Register.MRef]];
+                oldValue = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]];
 
 
             var newValue = oldValue - 1;
 
 
-            SetSign(cpu, newValue);
+            SetSign(newValue);
 
-            SetZero(cpu, newValue);
+            SetZero(newValue);
 
-            SetParity(cpu, newValue);
+            SetParity(newValue);
 
-            SetAux(cpu, newValue, oldValue);
+            SetAux(newValue, oldValue);
 
 
             if (register != Register.MRef)
-                cpu.Registers[register] = (byte)(newValue & 0xFF);
+                Cpu.Current.Registers[register] = (byte)(newValue & 0xFF);
             else
-                cpu.Memory[cpu.Registers[register]] = (byte)(newValue & 0xFF);
+                Cpu.Current.Memory[Cpu.Current.Registers[register]] = (byte)(newValue & 0xFF);
         }
 
-        internal static void Mvi(Cpu cpu, int register)
+        internal static void Mvi(int register)
         {
             if (register == Register.MRef) throw new NotImplementedException("mref is not yet properly implemented!!");
 
-            DebugPrint("MVI", cpu);
-            var immediate = cpu.Memory[cpu.Pc + 1];
-            cpu.Registers[register] = immediate;
-            cpu.Pc++;
+            DebugPrint("MVI");
+            var immediate = Cpu.Current.Memory[Cpu.Current.Pc + 1];
+            Cpu.Current.Registers[register] = immediate;
+            Cpu.Current.Pc++;
         }
 
-        internal static void Rlc(Cpu cpu)
+        internal static void Rlc()
         {
-            DebugPrint("RLC", cpu);
+            DebugPrint("RLC");
 
             throw new NotImplementedException("Unimplemented RLC");
         }
 
-        internal static void Dad(Cpu cpu, int registerPair)
+        internal static void Dad(int registerPair)
         {
-            DebugPrint("DAD", cpu);
+            DebugPrint("DAD");
 
             throw new NotImplementedException("Unimplemented DAD");
         }
 
-        internal static void Ldax(Cpu cpu, int registers)
+        internal static void Ldax(int registers)
         {
-            DebugPrint("LDAX", cpu);
+            DebugPrint("LDAX");
 
             throw new NotImplementedException("Unimplemented LDAX");
         }
 
 
-        internal static void Dcx(Cpu cpu, int registerPair)
+        internal static void Dcx(int registerPair)
         {
-            DebugPrint("DCX", cpu);
+            DebugPrint("DCX");
 
             throw new NotImplementedException("Unimplemented DCX");
         }
 
 
-        internal static void Rrc(Cpu cpu)
+        internal static void Rrc()
         {
-            DebugPrint("RRC", cpu);
+            DebugPrint("RRC");
 
             throw new NotImplementedException("Unimplemented RRC");
         }
 
-        internal static void Ral(Cpu cpu)
+        internal static void Ral()
         {
-            DebugPrint("RAL", cpu);
+            DebugPrint("RAL");
 
             throw new NotImplementedException("Unimplemented RAL");
         }
 
-        internal static void Rar(Cpu cpu)
+        internal static void Rar()
         {
-            DebugPrint("RAR", cpu);
+            DebugPrint("RAR");
 
             throw new NotImplementedException("Unimplemented RAR");
         }
 
 
-        internal static void Shld(Cpu cpu)
+        internal static void Shld()
         {
-            DebugPrint("SHLD", cpu);
+            DebugPrint("SHLD");
 
             throw new NotImplementedException("Unimplemented SHLD");
         }
 
 
-        internal static void Daa(Cpu cpu)
+        internal static void Daa()
         {
-            DebugPrint("DAA", cpu);
+            DebugPrint("DAA");
 
             throw new NotImplementedException("Unimplemented DAA");
         }
 
 
-        internal static void Lhld(Cpu cpu)
+        internal static void Lhld()
         {
-            DebugPrint("LHLD", cpu);
+            DebugPrint("LHLD");
 
             throw new NotImplementedException("Unimplemented LHLD");
         }
 
-        internal static void Cma(Cpu cpu)
+        internal static void Cma()
         {
-            DebugPrint("CMA", cpu);
-            cpu.Registers[Register.A] = (byte)~cpu.Registers[Register.A];
+            DebugPrint("CMA");
+            Cpu.Current.Registers[Register.A] = (byte)~Cpu.Current.Registers[Register.A];
         }
 
-        internal static void Rnz(Cpu cpu)
+        internal static void Rnz()
         {
-            DebugPrint("RNZ", cpu);
+            DebugPrint("RNZ");
 
             throw new NotImplementedException("Unimplemented RNZ");
         }
 
-        internal static void Rnc(Cpu cpu)
+        internal static void Rnc()
         {
-            DebugPrint("RNC", cpu);
+            DebugPrint("RNC");
 
             throw new NotImplementedException("Unimplemented RNC");
         }
 
-        internal static void Rpo(Cpu cpu)
+        internal static void Rpo()
         {
-            DebugPrint("RPO", cpu);
+            DebugPrint("RPO");
 
             throw new NotImplementedException("Unimplemented RPO");
         }
 
-        internal static void Rp(Cpu cpu)
+        internal static void Rp()
         {
-            DebugPrint("RP", cpu);
+            DebugPrint("RP");
 
             throw new NotImplementedException("Unimplemented RP");
         }
 
-        internal static void Hlt(Cpu cpu)
+        internal static void Hlt()
         {
-            DebugPrint("HLT", cpu);
+            DebugPrint("HLT");
 
             throw new NotImplementedException("Unimplemented HLT");
         }
 
-        internal static void Mov(Cpu cpu, int src, int dst)
+        internal static void Mov(int src, int dst)
         {
-            DebugPrint("MOV", cpu);
+            DebugPrint("MOV");
 
-            cpu.Registers[dst] = cpu.Registers[src];
+            Cpu.Current.Registers[dst] = Cpu.Current.Registers[src];
         }
 
-        internal static void Add(Cpu cpu, int register)
+        internal static void Add(int register)
         {
-            DebugPrint("ADD", cpu);
+            DebugPrint("ADD");
 
             int addToAccumulator;
-            int oldAccumulator = cpu.Registers[Register.A];
+            int oldAccumulator = Cpu.Current.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                addToAccumulator = cpu.Registers[register];
+                addToAccumulator = Cpu.Current.Registers[register];
             else
                 //Set the working int as the memory reference
-                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]];
+                addToAccumulator = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]];
 
             //Make sure the new accumulator total isn't any more than 255 (1 byte)
             var newAccumulator = addToAccumulator + oldAccumulator;
 
 
-            SetCarry(cpu, newAccumulator);
+            SetCarry(newAccumulator);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
-            SetZero(cpu, newAccumulator);
+            SetZero(newAccumulator);
 
-            SetParity(cpu, newAccumulator);
+            SetParity(newAccumulator);
 
-            SetAux(cpu, oldAccumulator, addToAccumulator);
+            SetAux(oldAccumulator, addToAccumulator);
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Adc(Cpu cpu, int register)
+        internal static void Adc(int register)
         {
-            DebugPrint("ADC", cpu);
+            DebugPrint("ADC");
 
 
             int addToAccumulator;
-            int oldAccumulator = cpu.Registers[Register.A];
+            int oldAccumulator = Cpu.Current.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                addToAccumulator = cpu.Registers[register] + (cpu.Flags & FlagSelector.Carry);
+                addToAccumulator = Cpu.Current.Registers[register] + (Cpu.Current.Flags & FlagSelector.Carry);
             else
                 //Set the working int as the memory reference
-                addToAccumulator = cpu.Memory[cpu.Registers[Register.MRef]] + (cpu.Flags & FlagSelector.Carry);
+                addToAccumulator = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]] +
+                                   (Cpu.Current.Flags & FlagSelector.Carry);
 
 
             var newAccumulator = addToAccumulator + oldAccumulator;
 
 
-            SetCarry(cpu, newAccumulator);
+            SetCarry(newAccumulator);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
-            SetZero(cpu, newAccumulator);
+            SetZero(newAccumulator);
 
-            SetParity(cpu, newAccumulator);
+            SetParity(newAccumulator);
 
 
-            SetAux(cpu, oldAccumulator, addToAccumulator);
+            SetAux(oldAccumulator, addToAccumulator);
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Sub(Cpu cpu, int register)
+        internal static void Sub(int register)
         {
-            DebugPrint("SUB", cpu);
+            DebugPrint("SUB");
 
             int subtrahend;
-            int minuend = cpu.Registers[Register.A];
+            int minuend = Cpu.Current.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                subtrahend = cpu.Registers[register];
+                subtrahend = Cpu.Current.Registers[register];
             else
                 //Set the working int as the memory reference
-                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
+                subtrahend = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]];
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
             var newAccumulator = minuend - subtrahend;
 
-            SetBorrow(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
+            SetBorrow(newAccumulator);
+            SetParity(newAccumulator);
+            SetZero(newAccumulator);
 
             //Set/unset the aux carry flag
             //TODO I'm note 100% sure my understanding of aux carry is right here
-            SetAux(cpu, minuend, twosComplementSubtrahend);
+            SetAux(minuend, twosComplementSubtrahend);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Sbb(Cpu cpu, int register)
+        internal static void Sbb(int register)
         {
-            DebugPrint("SBB", cpu);
+            DebugPrint("SBB");
 
             int subtrahend;
-            int minuend = cpu.Registers[Register.A];
+            int minuend = Cpu.Current.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                subtrahend = cpu.Registers[register] + (cpu.Flags & FlagSelector.Carry);
+                subtrahend = Cpu.Current.Registers[register] + (Cpu.Current.Flags & FlagSelector.Carry);
             else
                 //Set the working int as the memory reference
-                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]] + (cpu.Flags & FlagSelector.Carry);
+                subtrahend = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]] +
+                             (Cpu.Current.Flags & FlagSelector.Carry);
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
             var newAccumulator = minuend - subtrahend;
 
-            SetCarry(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
-            SetAux(cpu, minuend, twosComplementSubtrahend);
-            SetSign(cpu, newAccumulator);
+            SetCarry(newAccumulator);
+            SetZero(newAccumulator);
+            SetParity(newAccumulator);
+            SetAux(minuend, twosComplementSubtrahend);
+            SetSign(newAccumulator);
 
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Ana(Cpu cpu, int register)
+        internal static void Ana(int register)
         {
-            DebugPrint("ANA", cpu);
+            DebugPrint("ANA");
 
-            var newAccumulator = cpu.Registers[Register.A] & cpu.Registers[register];
+            var newAccumulator = Cpu.Current.Registers[Register.A] & Cpu.Current.Registers[register];
 
-            SetCarry(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetSign(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
+            SetCarry(newAccumulator);
+            SetZero(newAccumulator);
+            SetSign(newAccumulator);
+            SetParity(newAccumulator);
 
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Xra(Cpu cpu, int register)
+        internal static void Xra(int register)
         {
-            DebugPrint("XRA", cpu);
+            DebugPrint("XRA");
 
-            var newAccumulator = cpu.Registers[Register.A] ^ cpu.Registers[register];
+            var newAccumulator = Cpu.Current.Registers[Register.A] ^ Cpu.Current.Registers[register];
 
-            SetCarry(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetSign(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
-            SetAux(cpu, newAccumulator, cpu.Registers[register]);
+            SetCarry(newAccumulator);
+            SetZero(newAccumulator);
+            SetSign(newAccumulator);
+            SetParity(newAccumulator);
+            SetAux(newAccumulator, Cpu.Current.Registers[register]);
 
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
-        internal static void Ora(Cpu cpu, int register)
+        internal static void Ora(int register)
         {
-            DebugPrint("ORA", cpu);
+            DebugPrint("ORA");
 
-            var newAccumulator = cpu.Registers[Register.A] | cpu.Registers[register];
+            var newAccumulator = Cpu.Current.Registers[Register.A] | Cpu.Current.Registers[register];
 
-            SetCarry(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetSign(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
+            SetCarry(newAccumulator);
+            SetZero(newAccumulator);
+            SetSign(newAccumulator);
+            SetParity(newAccumulator);
 
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
         }
 
 
-        internal static void Cmp(Cpu cpu, int register)
+        internal static void Cmp(int register)
         {
-            DebugPrint("CMP", cpu);
+            DebugPrint("CMP");
 
             int subtrahend;
-            int minuend = cpu.Registers[Register.A];
+            int minuend = Cpu.Current.Registers[Register.A];
 
             if (register != Register.MRef)
                 //Set the working int as the register in question
-                subtrahend = cpu.Registers[register];
+                subtrahend = Cpu.Current.Registers[register];
             else
                 //Set the working int as the memory reference
-                subtrahend = cpu.Memory[cpu.Registers[Register.MRef]];
+                subtrahend = Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]];
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
             var newAccumulator = minuend - subtrahend;
 
-            SetBorrow(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
+            SetBorrow(newAccumulator);
+            SetZero(newAccumulator);
+            SetParity(newAccumulator);
 
             //Set/unset the aux carry flag
-            SetAux(cpu, minuend, twosComplementSubtrahend);
+            SetAux(minuend, twosComplementSubtrahend);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
         }
 
 
-        internal static void Stc(Cpu cpu)
+        internal static void Stc()
         {
-            DebugPrint("STC", cpu);
+            DebugPrint("STC");
 
-            cpu.SetFlags(1, FlagSelector.Carry, cpu);
+            Cpu.Current.SetFlags(1, FlagSelector.Carry);
         }
 
-        internal static void Sbi(Cpu cpu)
+        internal static void Sbi()
         {
-            DebugPrint("SBI", cpu);
+            DebugPrint("SBI");
 
 
             throw new NotImplementedException("Unimplemented SBI");
         }
 
-        internal static void Ani(Cpu cpu)
+        internal static void Ani()
         {
-            DebugPrint("ANI", cpu);
+            DebugPrint("ANI");
 
             throw new NotImplementedException("Unimplemented ANI");
         }
 
-        internal static void Sui(Cpu cpu)
+        internal static void Sui()
         {
-            DebugPrint("SUI", cpu);
+            DebugPrint("SUI");
 
-            int subtrahend = cpu.Memory[cpu.Pc + 1];
-            int minuend = cpu.Registers[Register.A];
+            int subtrahend = Cpu.Current.Memory[Cpu.Current.Pc + 1];
+            int minuend = Cpu.Current.Registers[Register.A];
 
 
             int twosComplementSubtrahend = GetTwosComplement(subtrahend);
 
             var newAccumulator = minuend - subtrahend;
 
-            SetBorrow(cpu, newAccumulator);
-            SetZero(cpu, newAccumulator);
-            SetParity(cpu, newAccumulator);
+            SetBorrow(newAccumulator);
+            SetZero(newAccumulator);
+            SetParity(newAccumulator);
 
             //Set/unset the aux carry flag
             //TODO I'm note 100% sure my understanding of aux carry is right here
-            SetAux(cpu, minuend, twosComplementSubtrahend);
+            SetAux(minuend, twosComplementSubtrahend);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
             //Set the accumulator to its new value
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
 
-            cpu.Pc++;
+            Cpu.Current.Pc++;
         }
 
-        internal static void Aci(Cpu cpu)
+        internal static void Aci()
         {
-            DebugPrint("ACI", cpu);
+            DebugPrint("ACI");
 
-            var addToAccumulator = cpu.Memory[cpu.Pc + 1] + (cpu.Flags & FlagSelector.Carry);
-            int oldAccumulator = cpu.Registers[Register.A];
+            var addToAccumulator = Cpu.Current.Memory[Cpu.Current.Pc + 1] + (Cpu.Current.Flags & FlagSelector.Carry);
+            int oldAccumulator = Cpu.Current.Registers[Register.A];
 
             var newAccumulator = addToAccumulator + oldAccumulator;
 
-            SetCarry(cpu, newAccumulator);
+            SetCarry(newAccumulator);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
-            SetZero(cpu, newAccumulator);
+            SetZero(newAccumulator);
 
-            SetParity(cpu, newAccumulator);
+            SetParity(newAccumulator);
 
-            SetAux(cpu, oldAccumulator, addToAccumulator);
+            SetAux(oldAccumulator, addToAccumulator);
 
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
 
             //increment pc to not interpret immediate data as opcode
-            cpu.Pc++;
+            Cpu.Current.Pc++;
         }
 
-        internal static void Adi(Cpu cpu)
+        internal static void Adi()
         {
-            DebugPrint("ADI", cpu);
+            DebugPrint("ADI");
 
-            int addToAccumulator = cpu.Memory[cpu.Pc + 1];
-            int oldAccumulator = cpu.Registers[Register.A];
+            int addToAccumulator = Cpu.Current.Memory[Cpu.Current.Pc + 1];
+            int oldAccumulator = Cpu.Current.Registers[Register.A];
 
             var newAccumulator = addToAccumulator + oldAccumulator;
 
-            SetCarry(cpu, newAccumulator);
+            SetCarry(newAccumulator);
 
-            SetSign(cpu, newAccumulator);
+            SetSign(newAccumulator);
 
-            SetZero(cpu, newAccumulator);
+            SetZero(newAccumulator);
 
-            SetParity(cpu, newAccumulator);
+            SetParity(newAccumulator);
 
-            SetAux(cpu, oldAccumulator, addToAccumulator);
+            SetAux(oldAccumulator, addToAccumulator);
 
-            cpu.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
+            Cpu.Current.Registers[Register.A] = (byte)(newAccumulator & 0xFF);
 
             //increment pc to not interpret immediate data as opcode
-            cpu.Pc++;
+            Cpu.Current.Pc++;
         }
 
-        internal static void Xri(Cpu cpu)
+        internal static void Xri()
         {
-            DebugPrint("XRI", cpu);
+            DebugPrint("XRI");
 
             throw new NotImplementedException("Unimplemented XRI");
         }
 
-        internal static void Ori(Cpu cpu)
+        internal static void Ori()
         {
-            DebugPrint("ORI", cpu);
+            DebugPrint("ORI");
 
             throw new NotImplementedException("Unimplemented ORI");
         }
 
-        internal static void Cpi(Cpu cpu)
+        internal static void Cpi()
         {
-            DebugPrint("CPI", cpu);
+            DebugPrint("CPI");
 
             throw new NotImplementedException("Unimplemented CPI");
         }
 
-        internal static void Jnc(Cpu cpu)
+        internal static void Jnc()
         {
-            DebugPrint("JNC", cpu);
+            DebugPrint("JNC");
 
-            if ((cpu.Flags & FlagSelector.Carry) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-
-                cpu.Pc = (uint)address - 1;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 0) Cpu.Current.Jump();
+            //   var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
+            // cpu.Pc = (uint)address - 1;
         }
 
-        internal static void Jnz(Cpu cpu)
+        internal static void Jnz()
         {
-            DebugPrint("JNZ", cpu);
-            if ((cpu.Flags & FlagSelector.Zero) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-
-                cpu.Pc = (uint)address - 1;
-            }
+            DebugPrint("JNZ");
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 0) Cpu.Current.Jump();
         }
 
 
-        internal static void Jmp(Cpu cpu)
+        internal static void Jmp()
         {
-            DebugPrint("JMP", cpu);
-            Console.WriteLine("opcode:" + Convert.ToString(cpu.Memory[cpu.Pc], 2).PadLeft(8, '0'));
-
-            var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-            //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-            cpu.Pc = (uint)address - 1;
+            DebugPrint("JMP");
+            Cpu.Current.Jump();
         }
 
-        internal static void Jz(Cpu cpu)
+        internal static void Jz()
         {
-            DebugPrint("JZ", cpu);
-            if ((cpu.Flags & FlagSelector.Zero) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1; //addressEndianCorrected;
-            }
+            DebugPrint("JZ");
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 1) Cpu.Current.Jump();
         }
 
-        internal static void Jc(Cpu cpu)
+        internal static void Jc()
         {
-            DebugPrint("JC", cpu);
+            DebugPrint("JC");
 
-            if ((cpu.Flags & FlagSelector.Carry) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.Jump();
         }
 
-        internal static void Jpo(Cpu cpu)
+        internal static void Jpo()
         {
-            DebugPrint("JPO", cpu);
-            if ((cpu.Flags & FlagSelector.Parity) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1; // addressEndianCorrected;
-            }
+            DebugPrint("JPO");
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 0) Cpu.Current.Jump();
         }
 
-        internal static void Jpe(Cpu cpu)
+        internal static void Jpe()
         {
-            DebugPrint("JPE", cpu);
+            DebugPrint("JPE");
 
-            if ((cpu.Flags & FlagSelector.Carry) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.Jump();
         }
 
-        internal static void Jp(Cpu cpu)
+        internal static void Jp()
         {
-            DebugPrint("JP", cpu);
+            DebugPrint("JP");
 
-            if ((cpu.Flags & FlagSelector.Parity) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 1) Cpu.Current.Jump();
         }
 
-        internal static void Jm(Cpu cpu)
+        internal static void Jm()
         {
-            DebugPrint("JM", cpu);
+            DebugPrint("JM");
 
-            if ((cpu.Flags & FlagSelector.Sign) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                //var addressEndianCorrected = BinaryPrimitives.ReverseEndianness(address);
-
-                cpu.Pc = (uint)address - 1; //addressEndianCorrected;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 1) Cpu.Current.Jump();
         }
 
-        internal static void Cmc(Cpu cpu)
+        internal static void Cmc()
         {
-            DebugPrint("CMC", cpu);
+            DebugPrint("CMC");
 
-            cpu.SetFlags(~(cpu.Flags & FlagSelector.Carry), FlagSelector.Carry, cpu);
+            Cpu.Current.SetFlags(~(Cpu.Current.Flags & FlagSelector.Carry), FlagSelector.Carry);
         }
 
-        internal static void Pop(Cpu cpu, int registerPair)
+        internal static void Pop(int registerPair)
         {
-            DebugPrint("POP", cpu);
+            DebugPrint("POP");
 
             throw new NotImplementedException("Unimplemented POP");
         }
 
-        internal static void Xchg(Cpu cpu)
+        internal static void Xchg()
         {
-            DebugPrint("XCHG", cpu);
+            DebugPrint("XCHG");
 
-            (cpu.Registers[Register.H], cpu.Registers[Register.D]) =
-                (cpu.Registers[Register.D], cpu.Registers[Register.H]);
+            (Cpu.Current.Registers[Register.H], Cpu.Current.Registers[Register.D]) =
+                (Cpu.Current.Registers[Register.D], Cpu.Current.Registers[Register.H]);
 
-            (cpu.Registers[Register.L], cpu.Registers[Register.E]) =
-                (cpu.Registers[Register.E], cpu.Registers[Register.L]);
+            (Cpu.Current.Registers[Register.L], Cpu.Current.Registers[Register.E]) =
+                (Cpu.Current.Registers[Register.E], Cpu.Current.Registers[Register.L]);
         }
 
-        internal static void Xthl(Cpu cpu)
+        internal static void Xthl()
         {
-            DebugPrint("XTHL", cpu);
+            DebugPrint("XTHL");
 
-            throw new NotImplementedException("Unimplemented XTHL");
+            var temp_L = Cpu.Current.Registers[Register.L];
+            Cpu.Current.Registers[Register.L] = Cpu.Current.Memory[Cpu.Current.Sp];
+            Cpu.Current.Memory[Cpu.Current.Sp] = temp_L;
         }
 
-        internal static void Sphl(Cpu cpu)
+        internal static void Sphl()
         {
-            DebugPrint("SPHL", cpu);
+            DebugPrint("SPHL");
 
             throw new NotImplementedException("Unimplemented SPHL");
         }
 
 
-        internal static void Sta(Cpu cpu)
+        internal static void Sta()
         {
-            DebugPrint("STA", cpu);
+            DebugPrint("STA");
 
             throw new NotImplementedException("Unimplemented STA");
         }
 
-        internal static void Lda(Cpu cpu)
+        internal static void Lda()
         {
-            DebugPrint("LDA", cpu);
+            DebugPrint("LDA");
 
             throw new NotImplementedException("Unimplemented LDA");
         }
 
-        internal static void Call(Cpu cpu)
+        internal static void Call()
         {
-            DebugPrint("CALL", cpu);
+            DebugPrint("CALL");
 
-            var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-
-            cpu.Sp.Push((ushort)(cpu.Pc + 3));
-            cpu.Pc = address;
+            Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cnz(Cpu cpu)
+        internal static void Cnz()
         {
-            DebugPrint("CNZ", cpu);
+            DebugPrint("CNZ");
 
-            if ((cpu.Flags & FlagSelector.Zero) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 1) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cz(Cpu cpu)
+        internal static void Cz()
         {
-            DebugPrint("CZ", cpu);
-            if ((cpu.Flags & FlagSelector.Zero) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            DebugPrint("CZ");
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 0) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cnc(Cpu cpu)
+        internal static void Cnc()
         {
-            DebugPrint("CNC", cpu);
+            DebugPrint("CNC");
 
-            if ((cpu.Flags & FlagSelector.Carry) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 0) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cc(Cpu cpu)
+        internal static void Cc()
         {
-            if ((cpu.Flags & FlagSelector.Carry) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cpo(Cpu cpu)
+        internal static void Cpo()
         {
-            DebugPrint("CPO", cpu);
+            DebugPrint("CPO");
 
-            if ((cpu.Flags & FlagSelector.Parity) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 0) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cpe(Cpu cpu)
+        internal static void Cpe()
         {
-            DebugPrint("CPE", cpu);
+            DebugPrint("CPE");
 
-            if ((cpu.Flags & FlagSelector.Parity) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 1) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cp(Cpu cpu)
+        internal static void Cp()
         {
-            DebugPrint("CP", cpu);
+            DebugPrint("CP");
 
-            if ((cpu.Flags & FlagSelector.Sign) == 0)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 0) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Cm(Cpu cpu)
+        internal static void Cm()
         {
-            DebugPrint("CM", cpu);
+            DebugPrint("CM");
 
-            if ((cpu.Flags & FlagSelector.Sign) == 1)
-            {
-                var address = BitConverter.ToUInt16(cpu.Memory, (int)cpu.Pc + 1);
-                cpu.Sp.Push((ushort)(cpu.Pc + 3));
-                cpu.Pc = address;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 1) Cpu.Current.PushStackAndJump();
         }
 
-        internal static void Ret(Cpu cpu)
+        internal static void Ret()
         {
-            DebugPrint("RET", cpu);
+            DebugPrint("RET");
             //we compensate for the automatic PC increment here, NOT when we push the pointer to the stack
-            cpu.Pc = (uint)cpu.Sp.Pop() - 1;
+            Cpu.Current.Pc = Cpu.Current.Pop();
         }
 
-        internal static void Rz(Cpu cpu)
+        internal static void Rz()
         {
-            DebugPrint("RZ", cpu);
-            if ((cpu.Flags & FlagSelector.Zero) == 1)
-            {
-                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
-            }
+            DebugPrint("RZ");
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 1) Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
 
-        internal static void Rc(Cpu cpu)
+        internal static void Rc()
         {
-            DebugPrint("RC", cpu);
-            if ((cpu.Flags & FlagSelector.Carry) == 1)
-            {
-                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
-            }
+            DebugPrint("RC");
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
 
-        internal static void Rpe(Cpu cpu)
+        internal static void Rpe()
         {
-            DebugPrint("RPE", cpu);
+            DebugPrint("RPE");
 
-            if ((cpu.Flags & FlagSelector.Parity) == 1)
-            {
-                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
-            }
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 1) Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
 
-        internal static void Rm(Cpu cpu)
+        internal static void Rm()
         {
-            DebugPrint("RM", cpu);
-            if ((cpu.Flags & FlagSelector.Sign) == 1)
-            {
-                cpu.Pc = (uint)cpu.Sp.Pop() - 1;
-            }
+            DebugPrint("RM");
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 1) Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
 
-        internal static void Ei(Cpu cpu)
+        internal static void Ei()
         {
-            DebugPrint("EI", cpu);
+            DebugPrint("EI");
 
             throw new NotImplementedException("Unimplemented EI");
         }
 
-        internal static void Di(Cpu cpu)
+        internal static void Di()
         {
-            DebugPrint("DI", cpu);
+            DebugPrint("DI");
 
             throw new NotImplementedException("Unimplemented DI");
         }
 
-        internal static void In(Cpu cpu)
+        internal static void In()
         {
-            DebugPrint("IN", cpu);
+            DebugPrint("IN");
 
             throw new NotImplementedException("Unimplemented IN");
         }
 
-        internal static void Out(Cpu cpu)
+        internal static void Out()
         {
-            DebugPrint("OUT", cpu);
+            DebugPrint("OUT");
 
             throw new NotImplementedException("Unimplemented OUT");
         }
 
 
-        internal static void Push(Cpu cpu, int registerPair)
+        internal static void Push(int registerPair)
         {
-            DebugPrint("PUSH", cpu);
+            DebugPrint("PUSH");
 
             throw new NotImplementedException("Unimplemented PUSH");
         }
 
-        internal static void Rst(Cpu cpu, int exp)
+        internal static void Rst(int exp)
         {
-            DebugPrint("RST", cpu);
+            DebugPrint("RST");
 
             throw new NotImplementedException("Unimplemented RST");
         }
 
-        internal static void Pchl(Cpu cpu)
+        internal static void Pchl()
         {
-            DebugPrint("PCHL", cpu);
+            DebugPrint("PCHL");
 
             throw new NotImplementedException("Unimplemented PCHL");
         }

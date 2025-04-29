@@ -78,56 +78,56 @@ namespace CPU
             return (byte)((~valueToCheck + 1) & 0xFF);
         }
 
-        internal static void SetParity(Cpu cpu, int value)
+        internal static void SetParity(int value)
         {
             if (ParityCounter(value & 0xFF) == 1)
-                cpu.SetFlags(1, FlagSelector.Parity, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.Parity);
             else
-                cpu.SetFlags(0, FlagSelector.Parity, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.Parity);
         }
 
-        internal static void SetCarry(Cpu cpu, int value)
+        internal static void SetCarry(int value)
         {
             if (value > 255)
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.Carry);
             else
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.Carry);
         }
 
-        internal static void SetBorrow(Cpu cpu, int value)
+        internal static void SetBorrow(int value)
         {
             if (value < 255)
-                cpu.SetFlags(1, FlagSelector.Carry, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.Carry);
             else
-                cpu.SetFlags(0, FlagSelector.Carry, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.Carry);
         }
 
-        internal static void SetZero(Cpu cpu, int value)
+        internal static void SetZero(int value)
         {
             if ((value & 0xFF) == 0)
-                cpu.SetFlags(1, FlagSelector.Zero, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.Zero);
             else
-                cpu.SetFlags(0, FlagSelector.Zero, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.Zero);
         }
 
-        internal static void SetSign(Cpu cpu, int value)
+        internal static void SetSign(int value)
         {
             //Check if Sign bit should be set
             if ((value & FlagSelector.Sign) == FlagSelector.Sign)
                 //Set the sign bit to 1
-                cpu.SetFlags(1, FlagSelector.Sign, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.Sign);
             else
                 //Set the sign bit to 0
-                cpu.SetFlags(0, FlagSelector.Sign, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.Sign);
         }
 
-        internal static void SetAux(Cpu cpu, int value1, int value2)
+        internal static void SetAux(int value1, int value2)
         {
             //check if there is a carry out of bit 3
             if ((value1 & 0xF) + (value2 & 0xF) > 15)
-                cpu.SetFlags(1, FlagSelector.AuxCarry, cpu);
+                Cpu.Current.SetFlags(1, FlagSelector.AuxCarry);
             else
-                cpu.SetFlags(0, FlagSelector.AuxCarry, cpu);
+                Cpu.Current.SetFlags(0, FlagSelector.AuxCarry);
         }
     }
 }

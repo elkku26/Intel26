@@ -17,75 +17,77 @@ namespace CPU.Tests
         [TestCase(0, 130, 130, "PS")] // AllFlagsLow_ParitySignHigh
         public void InstructionADDRegister(byte a, byte b, byte expected, string expectedFlags)
         {
-            var cpu = new Cpu { Registers = { [Register.A] = a, [Register.B] = b } };
-            Instructions.Add(cpu, Register.B);
+            Cpu.Current = new Cpu { Registers = { [Register.A] = a, [Register.B] = b } };
+            Instructions.Add(Register.B);
 
-            Assert.That(cpu.Registers[Register.A], Is.EqualTo(expected));
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor(expectedFlags)));
+            Assert.That(Cpu.Current.Registers[Register.A], Is.EqualTo(expected));
+            Assert.That(Cpu.Current.Flags, Is.EqualTo(FlagConstructor(expectedFlags)));
         }
 
 
         [Test]
         public void InstructionADDMemRef_AllFlagsLow_AllFlagsLow()
         {
-            var cpu = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
+            Cpu.Current = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
 
-            Instructions.Add(cpu, Register.MRef);
+            Instructions.Add(Register.MRef);
 
             //Check that the value in the accumulator is correct
-            Assert.That(cpu.Memory[cpu.Registers[Register.MRef]], Is.EqualTo(118));
+            Assert.That(Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]], Is.EqualTo(118));
 
             //Check that all flags are empty
-            Assert.That(cpu.Flags, Is.Zero);
+            Assert.That(Cpu.Current.Flags, Is.Zero);
         }
 
 
         [Test]
         public void InstructionADCToRegister_CarryHigh_ParitySignHigh()
         {
-            var cpu = new Cpu { Registers = { [Register.B] = 131 } };
-            cpu.SetFlags(1, FlagSelector.Carry, cpu);
-            Instructions.Adc(cpu, Register.B);
+            Cpu.Current = new Cpu { Registers = { [Register.B] = 131 } };
+
+            Cpu.Current.SetFlags(1, FlagSelector.Carry);
+            Instructions.Adc(Register.B);
 
             //Check that the value in the accumulator is correct
-            Assert.That(cpu.Registers[Register.A], Is.EqualTo(132));
+            Assert.That(Cpu.Current.Registers[Register.A], Is.EqualTo(132));
 
             //Check that the parity and sign flags are set and rest are unset
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PS")));
+            Assert.That(Cpu.Current.Flags, Is.EqualTo(FlagConstructor("PS")));
         }
 
         [Test]
         public void InstructionADCMemRef_AllFlagsLow_AllFlagsLow()
         {
-            var cpu = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
+            Cpu.Current = new Cpu { Memory = { [100] = 118 }, Registers = { [Register.MRef] = 100 } };
 
-            Instructions.Adc(cpu, Register.MRef);
+            Instructions.Adc(Register.MRef);
 
             //Check that the value in the accumulator is correct
-            Assert.That(cpu.Memory[cpu.Registers[Register.MRef]], Is.EqualTo(118));
+            Assert.That(Cpu.Current.Memory[Cpu.Current.Registers[Register.MRef]], Is.EqualTo(118));
 
             //Check that all flags are empty
-            Assert.That(cpu.Flags, Is.Zero);
+            Assert.That(Cpu.Current.Flags, Is.Zero);
         }
 
         [Test]
         public void InstructionMOVFromBToC_AllFlagsLow_NoChange()
         {
-            var cpu = new Cpu { Registers = { [Register.B] = 6 } };
-            Instructions.Mov(cpu, Register.B, Register.C);
+            Cpu.Current = new Cpu { Registers = { [Register.B] = 6 } };
+            Instructions.Mov(Register.B, Register.C);
 
-            Assert.That(cpu.Registers[Register.C], Is.EqualTo(6));
-            Assert.That(cpu.Registers[Register.B], Is.EqualTo(6));
-            Assert.That(cpu.Flags, Is.Zero);
+            Assert.That(Cpu.Current.Registers[Register.C], Is.EqualTo(6));
+            Assert.That(Cpu.Current.Registers[Register.B], Is.EqualTo(6));
+            Assert.That(Cpu.Current.Flags, Is.Zero);
         }
 
         [Test]
         public void InstructionSUB_A_AllFlagsLow_ParityZeroAuxHigh()
         {
-            var cpu = new Cpu { Registers = { [Register.A] = 0x3E } };
-            Instructions.Sub(cpu, Register.A);
+            Cpu.Current = new Cpu { Registers = { [Register.A] = 0x3E } };
+            Cpu.Current.Flags = FlagConstructor("");
+            Instructions.Sub(Register.A);
 
-            Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("PZA")));
+            Assert.That(Cpu.Current.Flags, Is.EqualTo(FlagConstructor("PZA")));
         }
 
 
@@ -95,31 +97,34 @@ namespace CPU.Tests
         [TestCase(RegisterPair.SP, (ushort)0xFFAA)]
         public void InstructionLXI(int registerPair, ushort immediate)
         {
-            var cpu = new Cpu
-                { Memory = { [1] = BitConverter.GetBytes(immediate)[0], [2] = BitConverter.GetBytes(immediate)[1] } };
-            Instructions.Lxi(cpu, registerPair);
+            Cpu.Current = new Cpu
+            {
+                Memory = { [1] = BitConverter.GetBytes(immediate)[1], [2] = BitConverter.GetBytes(immediate)[0] },
+                Sp = 2048
+            };
+            Instructions.Lxi(registerPair);
 
             switch (registerPair)
             {
                 case RegisterPair.B:
-                    Assert.That(cpu.Registers[Register.B], Is.EqualTo(0xAA));
-                    Assert.That(cpu.Registers[Register.C], Is.EqualTo(0xFF));
+                    Assert.That(Cpu.Current.Registers[Register.B], Is.EqualTo(0xAA));
+                    Assert.That(Cpu.Current.Registers[Register.C], Is.EqualTo(0xFF));
 
                     break;
 
                 case RegisterPair.D:
-                    Assert.That(cpu.Registers[Register.D], Is.EqualTo(0xAA));
-                    Assert.That(cpu.Registers[Register.E], Is.EqualTo(0xFF));
+                    Assert.That(Cpu.Current.Registers[Register.D], Is.EqualTo(0xAA));
+                    Assert.That(Cpu.Current.Registers[Register.E], Is.EqualTo(0xFF));
                     break;
 
                 case RegisterPair.H:
-                    Assert.That(cpu.Registers[Register.H], Is.EqualTo(0xAA));
-                    Assert.That(cpu.Registers[Register.L], Is.EqualTo(0xFF));
+                    Assert.That(Cpu.Current.Registers[Register.H], Is.EqualTo(0xAA));
+                    Assert.That(Cpu.Current.Registers[Register.L], Is.EqualTo(0xFF));
 
                     break;
 
                 case RegisterPair.SP:
-                    Assert.That(cpu.Sp, Is.EqualTo(0xAAFF));
+                    Assert.That(BitConverter.ToUInt16(Cpu.Current.Memory, Cpu.Current.Sp), Is.EqualTo(0xAAFF));
                     break;
             }
         }
@@ -132,10 +137,10 @@ namespace CPU.Tests
         [TestCase(Register.MRef, 0xFA)]
         public void InstructionMVI(int register, byte immediate)
         {
-            var cpu = new Cpu { Memory = { [1] = immediate } };
-            Instructions.Mvi(cpu, register);
+            Cpu.Current = new Cpu { Memory = { [1] = immediate } };
+            Instructions.Mvi(register);
 
-            Assert.That(cpu.Registers[register], Is.EqualTo(immediate));
+            Assert.That(Cpu.Current.Registers[register], Is.EqualTo(immediate));
         }
     }
 }

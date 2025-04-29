@@ -14,9 +14,9 @@ namespace CPU
         /// <param name="opcode">The opcode currently being evaluated</param>
         /// <param name="instance">The current CPU instance</param>
         /// <param name="message">A string containing any arbitrary data the programmer wants displayed</param>
-        public static void DebugPrint(string opcode, Cpu cpu, string message = "")
+        public static void DebugPrint(string opcode, string message = "")
         {
-            Debug.WriteLine("PC: {1}\nInstruction: {0}", opcode, cpu.Pc);
+            Debug.WriteLine("PC: {1}\nInstruction: {0}", opcode, Cpu.Current.Pc);
             Debug.WriteLine(message + '\n');
         }
 

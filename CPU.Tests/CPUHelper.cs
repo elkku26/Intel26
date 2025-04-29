@@ -11,7 +11,7 @@ namespace CPU.Tests
         public void CPUHelperSetFlag_AllFlagsLow_SetAllHigh()
         {
             var cpu = new Cpu { Flags = new byte() };
-            cpu.SetFlags(1, FlagConstructor("CPAZS"), cpu);
+            cpu.SetFlags(1, FlagConstructor("CPAZS"));
 
             //Check that carry is set
             Assert.That(cpu.Flags, Is.EqualTo(FlagConstructor("CPAZS")));
@@ -32,7 +32,7 @@ namespace CPU.Tests
         {
             var cpu = new Cpu();
             cpu.Flags = FlagConstructor("PS");
-            cpu.SetFlags(0, FlagSelector.Parity, cpu);
+            cpu.SetFlags(0, FlagSelector.Parity);
 
             //Check that the correct flags are set
             //(sign is set, rest unset)
