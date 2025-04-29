@@ -161,7 +161,7 @@ namespace CPU
             return Memory[Sp + 1];
         }
 
-        public void PushStackAndJump()
+        public void Call()
         {
             //var address = BitConverter.ToUInt16(Memory, (int)Pc + 1);
             //BinaryPrimitives.ReverseEndianness(address);

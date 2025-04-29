@@ -705,60 +705,60 @@ namespace CPU
         {
             DebugPrint("CALL");
 
-            Cpu.Current.PushStackAndJump();
+            Cpu.Current.Call();
         }
 
         internal static void Cnz()
         {
             DebugPrint("CNZ");
 
-            if ((Cpu.Current.Flags & FlagSelector.Zero) == 1) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 1) Cpu.Current.Call();
         }
 
         internal static void Cz()
         {
             DebugPrint("CZ");
-            if ((Cpu.Current.Flags & FlagSelector.Zero) == 0) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Zero) == 0) Cpu.Current.Call();
         }
 
         internal static void Cnc()
         {
             DebugPrint("CNC");
 
-            if ((Cpu.Current.Flags & FlagSelector.Carry) == 0) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 0) Cpu.Current.Call();
         }
 
         internal static void Cc()
         {
-            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Carry) == 1) Cpu.Current.Call();
         }
 
         internal static void Cpo()
         {
             DebugPrint("CPO");
 
-            if ((Cpu.Current.Flags & FlagSelector.Parity) == 0) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 0) Cpu.Current.Call();
         }
 
         internal static void Cpe()
         {
             DebugPrint("CPE");
 
-            if ((Cpu.Current.Flags & FlagSelector.Parity) == 1) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Parity) == 1) Cpu.Current.Call();
         }
 
         internal static void Cp()
         {
             DebugPrint("CP");
 
-            if ((Cpu.Current.Flags & FlagSelector.Sign) == 0) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 0) Cpu.Current.Call();
         }
 
         internal static void Cm()
         {
             DebugPrint("CM");
 
-            if ((Cpu.Current.Flags & FlagSelector.Sign) == 1) Cpu.Current.PushStackAndJump();
+            if ((Cpu.Current.Flags & FlagSelector.Sign) == 1) Cpu.Current.Call();
         }
 
         internal static void Ret()
