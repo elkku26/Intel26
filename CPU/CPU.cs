@@ -187,6 +187,9 @@ namespace CPU
 ;                    return (ushort) ((Registers[Register.H]<<8)+ Registers[Register.L]);
                 case RegisterPair.SP:
                     return Sp;
+                default:
+                    Debug.WriteLine("invalid register pair");
+                    return 1000;
             }
         }
 
