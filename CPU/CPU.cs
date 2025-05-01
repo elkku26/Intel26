@@ -66,8 +66,9 @@ namespace CPU
 
             var fullPath = args[0];
 
+            
             if (!File.Exists(fullPath)) Die(Error.FileNotFound, "Please enter a file as the first argument.");
-
+            
             var cpu = new Cpu(fullPath);
             cpu.StartCpu();
         }
@@ -113,7 +114,7 @@ namespace CPU
         {
             Debug.WriteLine("Loading data");
             var programData = File.ReadAllBytes(path);
-            Array.Copy(programData, 0, Memory, 0, programData.Length);
+            Array.Copy(programData, 0, Memory, 100, programData.Length);
             Debug.WriteLine("Load succesful");
 
             return Memory;
@@ -126,6 +127,9 @@ namespace CPU
         {
             Current = this;
             Memory = LoadData(_fullPath);
+            Memory[5] = 0xc9;
+            Current.Sp = (ushort)(Memory.Length - 1);
+            Current.Pc = 100;
             Debug.WriteLine("Start successful");
             while (true) Step();
         }
@@ -150,7 +154,7 @@ namespace CPU
             //Console.WriteLine("opcode:" + Convert.ToString(cpu.Memory[cpu.Pc], 2).PadLeft(8, '0'));
 
             var address = BitConverter.ToUInt16(Memory, (int)Pc + 1);
-            BinaryPrimitives.ReverseEndianness(address);
+            //address = BinaryPrimitives.ReverseEndianness(address);
 
             Pc = (uint)address - 1;
         }
@@ -169,6 +173,21 @@ namespace CPU
             PushStack((ushort)(Pc + 3));
 
             Jump();
+        }
+
+        public ushort GetWord(int registerPair)
+        {
+            switch (registerPair)
+            {
+                case RegisterPair.B:
+;                    return (ushort) ((Registers[Register.B]<<8)+ Registers[Register.C]);
+                case RegisterPair.D:
+;                    return (ushort) ((Registers[Register.C]<<8)+ Registers[Register.D]);
+                case RegisterPair.H:
+;                    return (ushort) ((Registers[Register.H]<<8)+ Registers[Register.L]);
+                case RegisterPair.SP:
+                    return Sp;
+            }
         }
 
         /// <summary>

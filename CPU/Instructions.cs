@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Diagnostics.PerformanceData;
 using System.Runtime.InteropServices.ComTypes;
 using static CPU.CPUHelper;
 using static CPU.DebugHelper;
@@ -17,6 +18,7 @@ namespace CPU
         internal static void Nop()
         {
             DebugPrint("NOP");
+            Die(Error.OutOfMemory);
         }
 
         internal static void Lxi(int registerPair)
@@ -764,6 +766,24 @@ namespace CPU
         internal static void Ret()
         {
             DebugPrint("RET");
+            if (Cpu.Current.Registers[Register.C] == 9)
+            {
+                //get characters from address stored in DE until $ (0x24)
+                var address = Cpu.Current.GetWord(RegisterPair.D);
+                var c =  ' ';
+                var msg = "";
+                while (c != '$')
+                {
+                    c = (char) Cpu.Current.Memory[address];
+                    msg += c;
+                    address++;
+                }
+                Debug.WriteLine("MSG: "+msg);
+            }
+            else if (Cpu.Current.Registers[Register.C] == 2)
+            {
+                Debug.WriteLine("E");
+            }
             //we compensate for the automatic PC increment here, NOT when we push the pointer to the stack
             Cpu.Current.Pc = Cpu.Current.Pop() - 1;
         }
